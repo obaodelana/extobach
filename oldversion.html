@@ -1,0 +1,3798 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#121212">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>ExToBach - Search People & Products</title>
+    <!-- Load Chart.js in head with defer attribute to ensure it's loaded before use -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.7.1/chart.min.js" defer></script>
+    <style>
+        :root {
+            --primary-bg: #121212;
+            --secondary-bg: #1e1e1e;
+            --text-color: #e0e0e0;
+            --accent-color: #404040;
+            --highlight-color: #606060;
+            --hover-color: #808080;
+            --blue-accent: #4285f4;
+            --green-accent: #34a853;
+            --red-accent: #ea4335;
+            --yellow-accent: #fbbc05;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, var(--primary-bg), var(--secondary-bg));
+            color: var(--text-color);
+            min-height: 100vh;
+            transition: background 0.5s ease;
+            overflow-x: hidden;
+        }
+        
+        /* Top navigation */
+        .top-nav {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            display: flex;
+            justify-content: flex-end;
+            padding: 15px 20px;
+            z-index: 100;
+        }
+        
+        .google-signin {
+            display: flex;
+            align-items: center;
+            background-color: #ffffff;
+            color: #757575;
+            border: none;
+            border-radius: 4px;
+            padding: 8px 16px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.25);
+        }
+        
+        .google-signin:hover {
+            background-color: #f8f8f8;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+        }
+        
+        .google-icon {
+            margin-right: 10px;
+            display: flex;
+        }
+        
+        /* Products section */
+        .top-products {
+            margin-top: 40px;
+            padding: 0 20px;
+            max-width: 1200px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
+        .products-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .products-title {
+            font-size: 24px;
+            font-weight: 600;
+        }
+        
+        .categories-dropdown {
+            position: relative;
+        }
+        
+        .categories-btn {
+            background-color: rgba(60, 60, 60, 0.8);
+            color: var(--text-color);
+            border: 1px solid var(--accent-color);
+            border-radius: 4px;
+            padding: 8px 16px;
+            font-size: 14px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+        }
+        
+        .categories-btn:hover {
+            background-color: var(--accent-color);
+        }
+        
+        .categories-icon {
+            margin-left: 8px;
+        }
+        
+        .categories-menu {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            width: 200px;
+            background-color: rgba(40, 40, 40, 0.95);
+            border-radius: 4px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            margin-top: 5px;
+            z-index: 10;
+            display: none;
+        }
+        
+        .categories-menu.show {
+            display: block;
+        }
+        
+        .category-item {
+            padding: 10px 15px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        
+        .category-item:hover {
+            background-color: var(--accent-color);
+        }
+        
+        .category-item.active {
+            background-color: var(--blue-accent);
+            color: #ffffff;
+        }
+        
+        .products-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+        
+        .product-card {
+            background-color: rgba(40, 40, 40, 0.6);
+            border-radius: 12px;
+            overflow: hidden;
+            transition: transform 0.3s, box-shadow 0.3s;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .product-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+        }
+        
+        .product-image {
+            width: 100%;
+            aspect-ratio: 16/9;
+            object-fit: cover;
+        }
+        
+        .product-info {
+            padding: 15px;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .product-name {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+        
+        .product-metrics {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 12px;
+        }
+        
+        .product-metric {
+            font-size: 14px;
+        }
+        
+        .product-description {
+            font-size: 14px;
+            color: #a0a0a0;
+            margin-bottom: 15px;
+            flex-grow: 1;
+        }
+        
+        .buy-button {
+            background-color: var(--blue-accent);
+            color: white;
+            border: none;
+            border-radius: 20px;
+            padding: 8px 0;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            width: 80px;
+            text-align: center;
+            align-self: flex-end;
+        }
+        
+        .buy-button:hover {
+            background-color: #2b68d9;
+            transform: scale(1.05);
+        }
+
+        /* Dynamic background animation */
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        body.animated-bg {
+            background: linear-gradient(135deg, #121212, #1e1e1e, #2a2a2a, #1e1e1e);
+            background-size: 400% 400%;
+            animation: gradientShift 15s ease infinite;
+        }
+
+        .container {
+            padding: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        /* Header styles */
+        header {
+            text-align: center;
+            margin-top: 15vh;
+            transition: margin 0.3s ease;
+        }
+
+        header.minimized {
+            margin-top: 20px;
+        }
+
+        .logo {
+            font-size: 42px;
+            font-weight: bold;
+            margin-bottom: 20px;
+            background: linear-gradient(to right, #a0a0a0, #ffffff);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            cursor: pointer; /* Add pointer cursor to indicate clickable */
+            transition: transform 0.2s ease;
+        }
+        
+        .logo:hover {
+            transform: scale(1.03); /* Slight scale increase on hover */
+        }
+
+        /* Search form styles */
+        .search-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-top: 30px;
+        }
+
+        .search-box {
+            display: flex;
+            width: 100%;
+            max-width: 584px;
+            margin-bottom: 20px;
+        }
+
+        .search-input {
+            flex: 1;
+            padding: 15px;
+            border: 1px solid var(--accent-color);
+            border-radius: 24px 0 0 24px;
+            background-color: rgba(40, 40, 40, 0.8);
+            color: var(--text-color);
+            font-size: 16px;
+            outline: none;
+            transition: all 0.3s;
+        }
+
+        .search-input:focus {
+            background-color: rgba(60, 60, 60, 0.9);
+            box-shadow: 0 0 10px rgba(150, 150, 150, 0.2);
+        }
+
+        .search-button {
+            padding: 15px 25px;
+            border: none;
+            border-radius: 0 24px 24px 0;
+            background-color: var(--accent-color);
+            color: var(--text-color);
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .search-button:hover {
+            background-color: var(--hover-color);
+        }
+
+        /* Search suggestions */
+        .search-suggestions {
+            display: none;
+            width: 100%;
+            max-width: 584px;
+            background-color: rgba(40, 40, 40, 0.95);
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            margin-top: 5px;
+            max-height: 300px;
+            overflow-y: auto;
+            z-index: 10;
+        }
+
+        .suggestion-item {
+            display: flex;
+            align-items: center;
+            padding: 12px 15px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .suggestion-item:hover {
+            background-color: var(--highlight-color);
+        }
+
+        .suggestion-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            margin-right: 15px;
+            object-fit: cover;
+        }
+
+        .suggestion-info {
+            flex: 1;
+        }
+
+        .suggestion-name {
+            font-weight: 500;
+            margin-bottom: 3px;
+        }
+
+        .suggestion-meta {
+            font-size: 12px;
+            color: #a0a0a0;
+        }
+
+        /* Profile page styles */
+        .profile-container {
+            display: none;
+            margin-top: 30px;
+            grid-template-columns: 1fr 2fr;
+            gap: 30px;
+        }
+        
+        /* Product profile specific styles */
+        .product-profile-container {
+            display: none;
+            margin-top: 30px;
+            grid-template-columns: 1fr 2fr;
+            gap: 30px;
+        }
+        
+        .product-buy-section {
+            display: flex;
+            align-items: center;
+            margin-top: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .product-price {
+            font-size: 24px;
+            font-weight: bold;
+            margin-right: 20px;
+        }
+        
+        .product-buy-button {
+            background-color: var(--blue-accent);
+            color: white;
+            border: none;
+            border-radius: 20px;
+            padding: 8px 24px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .product-buy-button:hover {
+            background-color: #2b68d9;
+            transform: scale(1.05);
+        }
+        
+        .product-details {
+            background-color: rgba(40, 40, 40, 0.6);
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 20px;
+        }
+        
+        .product-details-title {
+            font-size: 18px;
+            margin-bottom: 10px;
+        }
+        
+        .product-specs {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            row-gap: 8px;
+            font-size: 14px;
+        }
+        
+        .spec-name {
+            color: #a0a0a0;
+        }
+
+        .profile-left {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .profile-photo-container {
+            position: relative;
+            margin-bottom: 20px;
+        }
+
+        .profile-photo {
+            width: 100%;
+            aspect-ratio: 1/1;
+            object-fit: cover;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        /* FIXED: Adjusted the buttons to properly position and avoid overlap */
+        .profile-actions {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            display: flex;
+            gap: 10px;
+            z-index: 5;
+        }
+        
+        .action-btn {
+            background-color: rgba(40, 40, 40, 0.8);
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .action-btn:hover {
+            background-color: rgba(80, 80, 80, 0.9);
+        }
+        
+        .action-icon {
+            width: 20px;
+            height: 20px;
+            fill: var(--text-color);
+        }
+        
+        .notification-active .notification-icon {
+            fill: var(--blue-accent);
+        }
+        
+        .save-active .save-icon {
+            fill: var(--red-accent);
+        }
+        
+        /* User profile dropdown */
+        .user-profile {
+            position: relative;
+            margin-left: 15px;
+        }
+        
+        .profile-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            cursor: pointer;
+            border: 2px solid var(--text-color);
+            transition: all 0.3s;
+        }
+        
+        .profile-avatar:hover {
+            border-color: var(--blue-accent);
+        }
+        
+        .profile-menu {
+            position: absolute;
+            top: 45px;
+            right: 0;
+            background-color: rgba(40, 40, 40, 0.95);
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            min-width: 220px;
+            z-index: 1000;
+            display: none;
+        }
+        
+        .profile-menu.show {
+            display: block;
+        }
+        
+        .profile-menu-header {
+            padding: 15px;
+            border-bottom: 1px solid var(--accent-color);
+            text-align: center;
+        }
+        
+        .profile-name-display {
+            font-weight: 600;
+            font-size: 16px;
+            margin-bottom: 5px;
+        }
+        
+        .profile-email {
+            font-size: 12px;
+            color: #a0a0a0;
+        }
+        
+        .profile-menu-section {
+            padding: 10px 0;
+            border-bottom: 1px solid var(--accent-color);
+        }
+        
+        .profile-menu-section:last-child {
+            border-bottom: none;
+        }
+        
+        .profile-menu-item {
+            padding: 10px 15px;
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        
+        .profile-menu-item:hover {
+            background-color: var(--accent-color);
+        }
+        
+        .profile-menu-icon {
+            width: 18px;
+            height: 18px;
+            margin-right: 10px;
+            fill: var(--text-color);
+        }
+        
+        .pro-tag {
+            margin-left: auto;
+            background-color: var(--blue-accent);
+            color: white;
+            font-size: 10px;
+            padding: 2px 6px;
+            border-radius: 10px;
+        }
+        
+        /* Pro modal */
+        .pro-features-list {
+            margin-top: 15px;
+        }
+        
+        .pro-feature {
+            display: flex;
+            margin-bottom: 15px;
+        }
+        
+        .pro-feature-icon {
+            width: 24px;
+            height: 24px;
+            fill: var(--blue-accent);
+            margin-right: 10px;
+            flex-shrink: 0;
+        }
+        
+        .pro-feature-text {
+            font-size: 14px;
+        }
+        
+        .pro-feature-title {
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+        
+        .pro-feature-description {
+            color: #a0a0a0;
+        }
+        
+        .pro-price {
+            text-align: center;
+            margin: 20px 0;
+            font-size: 24px;
+            font-weight: bold;
+        }
+        
+        .pro-price-period {
+            font-size: 14px;
+            font-weight: normal;
+            color: #a0a0a0;
+        }
+        
+        .subscribe-btn {
+            width: 100%;
+            padding: 12px;
+            background-color: var(--blue-accent);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .subscribe-btn:hover {
+            background-color: #2b68d9;
+        }
+        
+        /* Account modal */
+        .account-form-group {
+            margin-bottom: 15px;
+        }
+        
+        .account-label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+        
+        .account-input {
+            width: 100%;
+            padding: 10px;
+            background-color: rgba(60, 60, 60, 0.8);
+            border: 1px solid var(--accent-color);
+            border-radius: 4px;
+            color: var(--text-color);
+            font-size: 14px;
+        }
+        
+        .account-btn {
+            width: 100%;
+            padding: 10px;
+            background-color: var(--blue-accent);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 5px;
+        }
+        
+        .account-btn.danger {
+            background-color: var(--red-accent);
+        }
+        
+        .account-btn:hover {
+            opacity: 0.9;
+        }
+        
+        /* Notification settings modal */
+        .notification-section {
+            margin-bottom: 20px;
+        }
+        
+        .notification-section-title {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 10px;
+            padding-bottom: 5px;
+            border-bottom: 1px solid var(--accent-color);
+        }
+        
+        .notification-option {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        
+        .notification-checkbox {
+            margin-right: 10px;
+        }
+        
+        .notification-label {
+            font-size: 14px;
+        }
+        
+        .notification-description {
+            font-size: 12px;
+            color: #a0a0a0;
+            margin-top: 3px;
+            margin-left: 24px;
+        }
+        
+        /* Graph trajectory colors */
+        .trajectory-up {
+            border-color: #4caf50 !important;
+            background-color: rgba(76, 175, 80, 0.1) !important;
+        }
+        
+        .trajectory-up .graph-point {
+            background-color: #4caf50 !important;
+        }
+        
+        .trajectory-down {
+            border-color: #f44336 !important;
+            background-color: rgba(244, 67, 54, 0.1) !important;
+        }
+        
+        .trajectory-down .graph-point {
+            background-color: #f44336 !important;
+        }
+        
+        .trajectory-neutral {
+            border-color: #4285f4 !important;
+            background-color: rgba(66, 133, 244, 0.1) !important;
+        }
+        
+        .trajectory-neutral .graph-point {
+            background-color: #4285f4 !important;
+        }
+        
+        /* Added: Styling for the view toggle buttons */
+        .titles-container {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 10px;
+        }
+        
+        .view-toggle {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        
+        .view-btn {
+            background-color: rgba(60, 60, 60, 0.8);
+            color: var(--text-color);
+            border: 1px solid var(--accent-color);
+            border-radius: 4px;
+            padding: 6px 12px;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .view-btn:hover {
+            background-color: var(--accent-color);
+        }
+        
+        .view-btn.active {
+            background-color: var(--blue-accent);
+            border-color: var(--blue-accent);
+            color: white;
+        }
+
+        .social-links {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 25px;
+        }
+
+        .social-link {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: var(--accent-color);
+            color: var(--text-color);
+            text-decoration: none;
+            transition: all 0.3s;
+        }
+
+        .social-link:hover {
+            background-color: var(--hover-color);
+            transform: translateY(-2px);
+        }
+
+        .social-icon {
+            width: 20px;
+            height: 20px;
+        }
+
+        .comments-section {
+            background-color: rgba(40, 40, 40, 0.6);
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 20px;
+        }
+
+        .comments-header {
+            font-size: 18px;
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .comment-count {
+            font-size: 14px;
+            color: #a0a0a0;
+        }
+
+        .comment-form {
+            display: flex;
+            margin-bottom: 20px;
+        }
+
+        .comment-input {
+            flex: 1;
+            padding: 10px 15px;
+            border: 1px solid var(--accent-color);
+            border-radius: 20px 0 0 20px;
+            background-color: rgba(50, 50, 50, 0.8);
+            color: var(--text-color);
+            font-size: 14px;
+            outline: none;
+        }
+
+        .comment-submit {
+            padding: 10px 15px;
+            border: none;
+            border-radius: 0 20px 20px 0;
+            background-color: var(--accent-color);
+            color: var(--text-color);
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .comment-submit:hover {
+            background-color: var(--hover-color);
+        }
+
+        .comment-list {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .comment-item {
+            margin-bottom: 15px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid rgba(100, 100, 100, 0.3);
+        }
+
+        .comment-item:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+
+        .comment-user {
+            display: flex;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .comment-avatar {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            margin-right: 10px;
+        }
+
+        .comment-username {
+            font-weight: 500;
+            font-size: 14px;
+        }
+
+        .comment-time {
+            margin-left: auto;
+            font-size: 12px;
+            color: #a0a0a0;
+        }
+
+        .comment-text {
+            font-size: 14px;
+            line-height: 1.4;
+        }
+
+        /* Profile right section */
+        .profile-right {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .profile-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .profile-name {
+            font-size: 32px;
+            font-weight: bold;
+        }
+
+        .profile-metrics {
+            display: flex;
+            gap: 20px;
+        }
+
+        .metric {
+            text-align: center;
+            background-color: rgba(40, 40, 40, 0.6);
+            padding: 10px 15px;
+            border-radius: 8px;
+        }
+
+        .metric-title {
+            font-size: 12px;
+            color: #a0a0a0;
+            margin-bottom: 5px;
+        }
+
+        .metric-value {
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        .positive {
+            color: #4caf50;
+        }
+
+        .neutral {
+            color: #ffc107;
+        }
+
+        .negative {
+            color: #f44336;
+        }
+
+        .tabs {
+            display: flex;
+            border-bottom: 1px solid var(--accent-color);
+            margin-bottom: 20px;
+        }
+
+        .tab {
+            padding: 10px 20px;
+            cursor: pointer;
+            font-weight: 500;
+            position: relative;
+            transition: all 0.3s;
+        }
+
+        .tab.active {
+            color: #ffffff;
+        }
+
+        .tab.active::after {
+            content: '';
+            position: absolute;
+            bottom: -1px;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background-color: #4285f4;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .graph-container {
+            background-color: rgba(40, 40, 40, 0.6);
+            border-radius: 8px;
+            padding: 20px;
+            height: 300px;
+            margin-bottom: 30px;
+            position: relative;
+        }
+
+        .graph-title {
+            position: absolute;
+            top: 10px;
+            left: 20px;
+            font-size: 16px;
+            font-weight: 500;
+        }
+
+        canvas {
+            width: 100%;
+            height: 100%;
+        }
+
+        .news-feed {
+            margin-top: 20px;
+        }
+
+        .news-header {
+            font-size: 20px;
+            margin-bottom: 15px;
+        }
+
+        .news-tabs {
+            display: flex;
+            border-bottom: 1px solid var(--accent-color);
+            margin-bottom: 15px;
+        }
+
+        .news-tab {
+            padding: 8px 15px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+
+        .news-tab.active {
+            color: #ffffff;
+            border-bottom: 2px solid #4285f4;
+        }
+
+        .news-content {
+            display: none;
+        }
+
+        .news-content.active {
+            display: block;
+        }
+
+        .news-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 15px;
+        }
+
+        .news-item {
+            background-color: rgba(40, 40, 40, 0.6);
+            border-radius: 8px;
+            overflow: hidden;
+            transition: transform 0.3s;
+        }
+
+        .news-item:hover {
+            transform: translateY(-5px);
+        }
+
+        .news-thumbnail {
+            width: 100%;
+            height: 150px;
+            object-fit: cover;
+        }
+
+        .news-info {
+            padding: 12px;
+        }
+
+        .news-source {
+            display: flex;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .news-source-icon {
+            width: 16px;
+            height: 16px;
+            margin-right: 8px;
+        }
+
+        .news-source-name {
+            font-size: 12px;
+            color: #a0a0a0;
+        }
+
+        .news-title {
+            font-size: 14px;
+            font-weight: 500;
+            margin-bottom: 8px;
+            line-height: 1.3;
+        }
+
+        .news-time {
+            font-size: 12px;
+            color: #a0a0a0;
+        }
+
+        /* Notification modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            /* Added for mobile accessibility */
+            overflow-y: auto;
+        }
+
+        .modal-content {
+            background-color: var(--secondary-bg);
+            border-radius: 8px;
+            width: 90%;
+            max-width: 400px;
+            padding: 20px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+            /* Added for better mobile experience */
+            margin: 20px auto;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .modal-title {
+            font-size: 18px;
+            font-weight: 500;
+        }
+
+        .close-modal {
+            background: none;
+            border: none;
+            color: var(--text-color);
+            font-size: 24px;
+            cursor: pointer;
+        }
+
+        .notification-form {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .form-label {
+            font-size: 14px;
+        }
+
+        .form-control {
+            padding: 10px;
+            background-color: rgba(60, 60, 60, 0.8);
+            border: 1px solid var(--accent-color);
+            border-radius: 4px;
+            color: var(--text-color);
+        }
+
+        .notification-save {
+            padding: 10px;
+            background-color: #4285f4;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 500;
+            margin-top: 10px;
+            transition: all 0.3s;
+        }
+
+        .notification-save:hover {
+            background-color: #2b68d9;
+        }
+
+        /* ENHANCED: Improved responsive styles for better mobile experience */
+        /* Responsive styles */
+        @media (max-width: 768px) {
+            .profile-container, .product-profile-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .profile-photo, .product-photo {
+                max-width: 100%;
+                margin: 0 auto;
+            }
+            
+            .news-list {
+                grid-template-columns: 1fr;
+            }
+            
+            .products-grid {
+                grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            }
+            
+            header {
+                margin-top: 10vh;
+            }
+            
+            .logo {
+                font-size: 36px;
+            }
+            
+            .search-box {
+                max-width: 90%;
+            }
+            
+            .profile-metrics, .product-metrics {
+                flex-wrap: wrap;
+                gap: 10px;
+            }
+            
+            .profile-header, .product-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .profile-name, .product-name {
+                margin-bottom: 15px;
+            }
+            
+            .tabs, .news-tabs {
+                overflow-x: auto;
+                white-space: nowrap;
+                padding-bottom: 5px;
+            }
+            
+            .graph-container {
+                height: 250px;
+            }
+            
+            .product-buy-section {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .product-price {
+                margin-bottom: 10px;
+                margin-right: 0;
+            }
+            
+            /* ADDED: Better touch targets for mobile */
+            .action-btn, .social-link {
+                width: 44px;
+                height: 44px;
+            }
+            
+            .action-icon, .social-icon {
+                width: 22px;
+                height: 22px;
+            }
+            
+            .tab, .news-tab {
+                padding: 12px 18px; /* Larger touch targets */
+            }
+            
+            /* Added: View toggle buttons styling for mobile */
+            .view-toggle {
+                margin-bottom: 15px;
+            }
+            
+            .view-btn {
+                padding: 8px 10px;
+                font-size: 12px;
+            }
+            
+            .titles-container {
+                margin-bottom: 15px;
+                width: 100%;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .logo {
+                font-size: 32px;
+            }
+            
+            .search-button {
+                padding: 15px 15px;
+            }
+            
+            .search-input {
+                padding: 15px 10px;
+            }
+            
+            .metric {
+                padding: 8px 10px;
+            }
+            
+            .metric-value {
+                font-size: 16px;
+            }
+            
+            .social-links {
+                justify-content: center;
+            }
+            
+            .google-signin span {
+                display: none;
+            }
+            
+            .products-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .categories-btn {
+                margin-top: 10px;
+            }
+            
+            /* ADDED: Fixed spacing for notifications on small screens */
+            .notification-option {
+                padding: 5px 0;
+            }
+            
+            .notification-description {
+                margin-left: 10px;
+                font-size: 11px;
+            }
+            
+            /* ADDED: Make form controls easier to use on mobile */
+            .form-control, .account-input, .comment-input {
+                font-size: 16px; /* Prevents iOS zoom on focus */
+                padding: 12px;
+            }
+            
+            /* ADDED: Ensure buttons are easy to tap */
+            .comment-submit, .search-button, .buy-button, .product-buy-button {
+                padding: 12px 16px;
+                min-height: 44px;
+            }
+        }
+
+        /* Presets dropdown */
+        .presets-container {
+            margin-top: 20px;
+            text-align: center;
+            display: none;
+        }
+
+        .presets-label {
+            margin-bottom: 10px;
+            font-size: 14px;
+            color: #a0a0a0;
+        }
+
+        .presets-dropdown {
+            padding: 8px 15px;
+            background-color: rgba(60, 60, 60, 0.8);
+            border: 1px solid var(--accent-color);
+            border-radius: 4px;
+            color: var(--text-color);
+            width: 200px;
+        }
+        
+        /* ADDED: Style for the "Back to Home" button on mobile */
+        .back-to-home {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background-color: var(--blue-accent);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.3);
+            z-index: 100;
+            display: none;
+        }
+        
+        .back-to-home svg {
+            width: 24px;
+            height: 24px;
+        }
+        
+        @media (max-width: 768px) {
+            .back-to-home {
+                display: flex;
+            }
+        }
+    </style>
+</head>
+<body class="animated-bg">
+    <div class="top-nav">
+        <button class="google-signin" id="google-signin">
+            <div class="google-icon">
+                <svg width="18" height="18" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48">
+                    <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
+                    <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
+                    <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
+                    <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
+                    <path fill="none" d="M0 0h48v48H0z"/>
+                </svg>
+            </div>
+            <span>Sign in with Google</span>
+        </button>
+        
+        <!-- User profile (hidden initially) -->
+        <div class="user-profile" id="user-profile" style="display: none;">
+            <img src="/api/placeholder/36/36" alt="User Profile" class="profile-avatar" id="profile-avatar">
+            <div class="profile-menu" id="profile-menu">
+                <div class="profile-menu-header">
+                    <div class="profile-name-display">John Doe</div>
+                    <div class="profile-email">johndoe@example.com</div>
+                </div>
+                <div class="profile-menu-section">
+                    <div class="profile-menu-item" id="saved-item">
+                        <svg class="profile-menu-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M17 3H7c-1.1 0-2 .9-2 2v16l7-3 7 3V5c0-1.1-.9-2-2-2z"/>
+                        </svg>
+                        Saved
+                    </div>
+                </div>
+                <div class="profile-menu-section">
+                    <div class="profile-menu-item" id="account-settings-item">
+                        <svg class="profile-menu-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+                        </svg>
+                        Account Settings
+                    </div>
+                    <div class="profile-menu-item" id="notification-settings-item">
+                        <svg class="profile-menu-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6v-5c0-3.07-1.64-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.63 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z"/>
+                        </svg>
+                        Notification Settings
+                    </div>
+                </div>
+                <div class="profile-menu-section">
+                    <div class="profile-menu-item" id="pro-item">
+                        <svg class="profile-menu-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm0 10.99h7c-.53 4.12-3.28 7.79-7 8.94V12H5V6.3l7-3.11v8.8z"/>
+                        </svg>
+                        Pro
+                        <span class="pro-tag">Upgrade</span>
+                    </div>
+                    <div class="profile-menu-item" id="sign-out-item">
+                        <svg class="profile-menu-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z"/>
+                        </svg>
+                        Sign Out
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ADDED: Mobile Back to Home button -->
+    <button class="back-to-home" id="back-to-home">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white">
+            <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/>
+        </svg>
+    </button>
+    
+    <div class="container">
+        <!-- Home page with search -->
+        <header id="header">
+            <div class="logo" id="logo">ExToBach</div>
+            <div class="search-container">
+                <div class="search-box">
+                    <input type="text" id="search-input" class="search-input" placeholder="Search for people or products...">
+                    <button class="search-button" id="search-button">Search</button>
+                </div>
+                <div class="search-suggestions" id="search-suggestions"></div>
+                
+                <!-- Presets dropdown (hidden) -->
+                <div class="presets-container">
+                    <div class="presets-label">Try a preset:</div>
+                    <select class="presets-dropdown" id="presets-dropdown">
+                        <option value="">Select a preset</option>
+                        <option value="persona">Persona</option>
+                        <option value="personb">Personb</option>
+                        <option value="personc">Personc</option>
+                        <option value="persond">Persond</option>
+                        <option value="persone">Persone</option>
+                        <!-- Add more presets as needed -->
+                        <option value="personz">Personz</option>
+                    </select>
+                </div>
+            </div>
+        </header>
+        
+        <!-- Top Products Section -->
+        <section class="top-products" id="top-products">
+            <div class="products-header">
+                <div class="titles-container">
+                    <h2 class="products-title" id="top-list-title">Top Products by Sentiment</h2>
+                    <div class="view-toggle">
+                        <button class="view-btn active" data-view="products" data-sort="sentiment">Products by Sentiment</button>
+                        <button class="view-btn" data-view="products" data-sort="relevancy">Products by Relevancy</button>
+                        <button class="view-btn" data-view="people" data-sort="sentiment">People by Sentiment</button>
+                        <button class="view-btn" data-view="people" data-sort="relevancy">People by Relevancy</button>
+                    </div>
+                </div>
+                <div class="categories-dropdown">
+                    <button class="categories-btn" id="categories-btn">
+                        All Categories
+                        <svg class="categories-icon" xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="6 9 12 15 18 9"></polyline>
+                        </svg>
+                    </button>
+                    <div class="categories-menu" id="categories-menu">
+                        <div class="category-item active" data-category="all">All Categories</div>
+                        <div class="category-item" data-category="tech">Technology</div>
+                        <div class="category-item" data-category="fashion">Fashion</div>
+                        <div class="category-item" data-category="home">Home & Kitchen</div>
+                        <div class="category-item" data-category="beauty">Beauty & Personal Care</div>
+                        <div class="category-item" data-category="sports">Sports & Outdoors</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="products-grid" id="products-grid">
+                <!-- Product cards will be inserted here -->
+            </div>
+        </section>
+
+        <!-- Profile page (hidden by default) -->
+        <div class="profile-container" id="profile-container">
+            <div class="profile-left">
+                <div class="profile-photo-container">
+                    <img id="profile-photo" class="profile-photo" src="/api/placeholder/400/400" alt="Profile Photo">
+                    <div class="profile-actions">
+                        <button class="action-btn save-btn" id="save-btn" title="Save profile">
+                            <svg class="action-icon save-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                                <path d="M17 3H7c-1.1 0-2 .9-2 2v16l7-3 7 3V5c0-1.1-.9-2-2-2z"/>
+                            </svg>
+                        </button>
+                        <button class="action-btn notification-btn" id="notification-btn" title="Set notifications">
+                            <svg class="action-icon notification-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6v-5c0-3.07-1.64-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.63 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z"/>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="social-links">
+                    <a href="#" class="social-link" title="Wikipedia">
+                        <svg class="social-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white">
+                            <path d="M12.09 13.119c-.936 1.932-2.217 4.548-2.853 5.728-.616 1.074-1.127.931-1.532.029-1.406-3.321-4.293-9.144-5.651-12.409-.251-.601-.441-.987-.619-1.139-.181-.15-.554-.24-1.122-.271C.103 5.033 0 4.982 0 4.898v-.455l.052-.046c.924-.005 5.401 0 5.401 0l.051.046v.434c0 .084-.047.142-.129.171-.246.086-.57.183-.55.309.021.123.347.85.692 1.661 1.711 3.92 3.637 8.257 4.063 9.075l.173.319.173-.319c.416-.759 1.496-2.772 1.496-2.772l-1.04-2.117c-.415-.84-.859-1.675-1.057-2.03-.323-.579-.755-.861-1.65-.958-.191-.021-.249-.084-.249-.171v-.434l.05-.046h4.527l.05.046v.434c0 .084-.024.171-.308.191-.84.059-.739.135-.661.519.128.626.354 1.061.757 1.858.368.736.835 1.659 1.128 2.222.488.88 1.529 2.736 1.529 2.736l.135-.242c.21-.39 1.315-2.66 2.39-4.922.564-1.183.674-1.562.453-1.979-.2-.39-.553-.6-1.13-.671-.176-.023-.26-.112-.26-.196v-.434l.052-.046h3.952l.051.046v.434zm-12.072 9.04c-.053 0-.081.034-.081.083 0 .049.028.085.081.085h12.924c.053 0 .081-.036.081-.085 0-.049-.028-.083-.081-.083z"/>
+                        </svg>
+                    </a>
+                    <a href="#" class="social-link" title="YouTube">
+                        <svg class="social-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white">
+                            <path d="M23.495 6.205a3.007 3.007 0 0 0-2.088-2.088c-1.87-.501-9.396-.501-9.396-.501s-7.507-.01-9.396.501A3.007 3.007 0 0 0 .527 6.205a31.247 31.247 0 0 0-.522 5.805 31.247 31.247 0 0 0 .522 5.783 3.007 3.007 0 0 0 2.088 2.088c1.868.502 9.396.502 9.396.502s7.506 0 9.396-.502a3.007 3.007 0 0 0 2.088-2.088 31.247 31.247 0 0 0 .5-5.783 31.247 31.247 0 0 0-.5-5.805zM9.609 15.601V8.408l6.264 3.602z"/>
+                        </svg>
+                    </a>
+                    <a href="#" class="social-link" title="X (Twitter)">
+                        <svg class="social-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white">
+                            <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+                        </svg>
+                    </a>
+                    <a href="#" class="social-link" title="TikTok">
+                        <svg class="social-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white">
+                            <path d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.79-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.21-1.43.08-2.86-.31-4.08-1.03-2.02-1.19-3.44-3.37-3.65-5.71-.02-.5-.03-1-.01-1.49.18-1.9 1.12-3.72 2.58-4.96 1.66-1.44 3.98-2.13 6.15-1.72.02 1.48-.04 2.96-.04 4.44-.99-.32-2.15-.23-3.02.37-.63.41-1.11 1.04-1.36 1.75-.21.51-.15 1.07-.14 1.61.24 1.64 1.82 3.02 3.5 2.87 1.12-.01 2.19-.66 2.77-1.61.19-.33.4-.67.41-1.06.1-1.79.06-3.57.07-5.36.01-4.03-.01-8.05.02-12.07z"/>
+                        </svg>
+                    </a>
+                    <a href="#" class="social-link" title="Instagram">
+                        <svg class="social-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white">
+                            <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
+                        </svg>
+                    </a>
+                    <a href="#" class="social-link" title="Reddit">
+                        <svg class="social-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white">
+                            <path d="M24 11.779c0-1.459-1.192-2.645-2.657-2.645-.715 0-1.363.286-1.84.746-1.81-1.191-4.259-1.949-6.971-2.046l1.483-4.669 4.016.941-.006.058c0 1.193.975 2.163 2.174 2.163 1.198 0 2.172-.97 2.172-2.163s-.975-2.164-2.172-2.164c-.92 0-1.704.574-2.021 1.379l-4.329-1.015c-.189-.046-.381.063-.44.249l-1.654 5.207c-2.838.034-5.409.798-7.3 2.025-.474-.438-1.103-.712-1.799-.712-1.465 0-2.656 1.187-2.656 2.646 0 .97.533 1.811 1.317 2.271-.052.282-.086.567-.086.857 0 3.911 4.808 7.093 10.719 7.093s10.72-3.182 10.72-7.093c0-.274-.029-.544-.075-.81.832-.447 1.405-1.312 1.405-2.318zm-17.224 1.816c0-.868.71-1.575 1.582-1.575.872 0 1.581.707 1.581 1.575s-.709 1.574-1.581 1.574-1.582-.706-1.582-1.574zm9.061 4.669c-.797.793-2.048 1.179-3.824 1.179l-.013-.003-.013.003c-1.777 0-3.028-.386-3.824-1.179-.145-.144-.145-.379 0-.523.145-.145.381-.145.526 0 .65.647 1.729.961 3.298.961l.013.003.013-.003c1.569 0 2.648-.315 3.298-.962.145-.145.381-.144.526 0 .145.145.145.379 0 .524zm-.189-3.095c-.872 0-1.581-.706-1.581-1.574 0-.868.709-1.575 1.581-1.575s1.581.707 1.581 1.575-.709 1.574-1.581 1.574z"/>
+                        </svg>
+                    </a>
+                    <a href="#" class="social-link" title="Facebook">
+                        <svg class="social-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white">
+                            <path d="M9.198 21.5h4v-8.01h3.604l.396-3.98h-4V7.5a1 1 0 0 1 1-1h3v-4h-3a5 5 0 0 0-5 5v2.01h-2l-.396 3.98h2.396v8.01Z"/>
+                        </svg>
+                    </a>
+                </div>
+                
+                <div class="comments-section">
+                    <div class="comments-header">
+                        <span>Comments</span>
+                        <span class="comment-count">243 comments</span>
+                    </div>
+                    <div class="comment-form">
+                        <input type="text" class="comment-input" placeholder="Add a comment...">
+                        <button class="comment-submit">Post</button>
+                    </div>
+                    <div class="comment-list">
+                        <!-- Sample comments -->
+                        <div class="comment-item">
+                            <div class="comment-user">
+                                <img src="/api/placeholder/24/24" alt="User Avatar" class="comment-avatar">
+                                <span class="comment-username">User123</span>
+                                <span class="comment-time">2 hours ago</span>
+                            </div>
+                            <div class="comment-text">
+                                Really interesting to see the sentiment changes over time. I wonder what caused that spike in February?
+                            </div>
+                        </div>
+                        <div class="comment-item">
+                            <div class="comment-user">
+                                <img src="/api/placeholder/24/24" alt="User Avatar" class="comment-avatar">
+                                <span class="comment-username">DataAnalyst</span>
+                                <span class="comment-time">5 hours ago</span>
+                            </div>
+                            <div class="comment-text">
+                                The correlation between sentiment and relevancy is fascinating. When sentiment drops, relevancy seems to increase.
+                            </div>
+                        </div>
+                        <div class="comment-item">
+                            <div class="comment-user">
+                                <img src="/api/placeholder/24/24" alt="User Avatar" class="comment-avatar">
+                                <span class="comment-username">TechEnthusiast</span>
+                                <span class="comment-time">1 day ago</span>
+                            </div>
+                            <div class="comment-text">
+                                ExToBach's metrics are always spot on. Love how they calculate the sentiment score based on 10 years of data!
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="profile-right">
+                <div class="profile-header">
+                    <h1 class="profile-name" id="profile-name">Person Name</h1>
+                    <div class="profile-metrics">
+                        <div class="metric">
+                            <div class="metric-title">Sentiment</div>
+                            <div class="metric-value positive" id="sentiment-value">78.45%</div>
+                        </div>
+                        <div class="metric">
+                            <div class="metric-title">Relevancy</div>
+                            <div class="metric-value" id="relevancy-value">2.3M</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="tabs">
+                    <div class="tab active" data-tab="sentiment">Sentiment</div>
+                    <div class="tab" data-tab="relevancy">Relevancy</div>
+                </div>
+                
+                <div class="tab-content active" id="sentiment-tab">
+                    <div class="graph-container">
+                        <canvas id="sentiment-chart"></canvas>
+                    </div>
+                </div>
+                
+                <div class="tab-content" id="relevancy-tab">
+                    <div class="graph-container">
+                        <canvas id="relevancy-chart"></canvas>
+                    </div>
+                </div>
+                
+                <div class="news-feed">
+                    <h2 class="news-header">Latest News</h2>
+                    <div class="news-tabs">
+                        <div class="news-tab active" data-news-tab="youtube">YouTube</div>
+                        <div class="news-tab" data-news-tab="tiktok">TikTok</div>
+                        <div class="news-tab" data-news-tab="x">X</div>
+                        <div class="news-tab" data-news-tab="articles">Articles</div>
+                    </div>
+                    
+                    <div class="news-content active" id="youtube-content">
+                        <div class="news-list">
+                            <!-- Sample YouTube videos -->
+                            <div class="news-item">
+                                <img src="/api/placeholder/250/150" alt="Video Thumbnail" class="news-thumbnail">
+                                <div class="news-info">
+                                    <div class="news-source">
+                                        <svg class="news-source-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="red">
+                                            <path d="M23.495 6.205a3.007 3.007 0 0 0-2.088-2.088c-1.87-.501-9.396-.501-9.396-.501s-7.507-.01-9.396.501A3.007 3.007 0 0 0 .527 6.205a31.247 31.247 0 0 0-.522 5.805 31.247 31.247 0 0 0 .522 5.783 3.007 3.007 0 0 0 2.088 2.088c1.868.502 9.396.502 9.396.502s7.506 0 9.396-.502a3.007 3.007 0 0 0 2.088-2.088 31.247 31.247 0 0 0 .5-5.783 31.247 31.247 0 0 0-.5-5.805zM9.609 15.601V8.408l6.264 3.602z"/>
+                                        </svg>
+                                        <span class="news-source-name">TechReview</span>
+                                    </div>
+                                    <div class="news-title">Interview with Person on Latest Technology Trends</div>
+                                    <div class="news-time">2 days ago • 245K views</div>
+                                </div>
+                            </div>
+                            <div class="news-item">
+                                <img src="/api/placeholder/250/150" alt="Video Thumbnail" class="news-thumbnail">
+                                <div class="news-info">
+                                    <div class="news-source">
+                                        <svg class="news-source-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="red">
+                                            <path d="M23.495 6.205a3.007 3.007 0 0 0-2.088-2.088c-1.87-.501-9.396-.501-9.396-.501s-7.507-.01-9.396.501A3.007 3.007 0 0 0 .527 6.205a31.247 31.247 0 0 0-.522 5.805 31.247 31.247 0 0 0 .522 5.783 3.007 3.007 0 0 0 2.088 2.088c1.868.502 9.396.502 9.396.502s7.506 0 9.396-.502a3.007 3.007 0 0 0 2.088-2.088 31.247 31.247 0 0 0 .5-5.783 31.247 31.247 0 0 0-.5-5.805zM9.609 15.601V8.408l6.264 3.602z"/>
+                                        </svg>
+                                        <span class="news-source-name">NewsChannel</span>
+                                    </div>
+                                    <div class="news-title">Person Reveals New Project at Annual Conference</div>
+                                    <div class="news-time">1 week ago • 1.2M views</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="news-content" id="tiktok-content">
+                        <div class="news-list">
+                            <!-- Sample TikTok videos -->
+                            <div class="news-item">
+                                <img src="/api/placeholder/250/150" alt="TikTok Thumbnail" class="news-thumbnail">
+                                <div class="news-info">
+                                    <div class="news-source">
+                                        <svg class="news-source-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white">
+                                            <path d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.79-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.21-1.43.08-2.86-.31-4.08-1.03-2.02-1.19-3.44-3.37-3.65-5.71-.02-.5-.03-1-.01-1.49.18-1.9 1.12-3.72 2.58-4.96 1.66-1.44 3.98-2.13 6.15-1.72.02 1.48-.04 2.96-.04 4.44-.99-.32-2.15-.23-3.02.37-.63.41-1.11 1.04-1.36 1.75-.21.51-.15 1.07-.14 1.61.24 1.64 1.82 3.02 3.5 2.87 1.12-.01 2.19-.66 2.77-1.61.19-.33.4-.67.41-1.06.1-1.79.06-3.57.07-5.36.01-4.03-.01-8.05.02-12.07z"/>
+                                        </svg>
+                                        <span class="news-source-name">TrendCreator</span>
+                                    </div>
+                                    <div class="news-title">Person Started a New Viral Trend</div>
+                                    <div class="news-time">3 days ago • 5.7M views</div>
+                                </div>
+                            </div>
+                            <div class="news-item">
+                                <img src="/api/placeholder/250/150" alt="TikTok Thumbnail" class="news-thumbnail">
+                                <div class="news-info">
+                                    <div class="news-source">
+                                        <svg class="news-source-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white">
+                                            <path d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.79-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.21-1.43.08-2.86-.31-4.08-1.03-2.02-1.19-3.44-3.37-3.65-5.71-.02-.5-.03-1-.01-1.49.18-1.9 1.12-3.72 2.58-4.96 1.66-1.44 3.98-2.13 6.15-1.72.02 1.48-.04 2.96-.04 4.44-.99-.32-2.15-.23-3.02.37-.63.41-1.11 1.04-1.36 1.75-.21.51-.15 1.07-.14 1.61.24 1.64 1.82 3.02 3.5 2.87 1.12-.01 2.19-.66 2.77-1.61.19-.33.4-.67.41-1.06.1-1.79.06-3.57.07-5.36.01-4.03-.01-8.05.02-12.07z"/>
+                                        </svg>
+                                        <span class="news-source-name">FunnyClips</span>
+                                    </div>
+                                    <div class="news-title">Person's Reaction to Latest Announcement</div>
+                                    <div class="news-time">Yesterday • 3.2M views</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="news-content" id="x-content">
+                        <div class="news-list">
+                            <!-- Sample X posts -->
+                            <div class="news-item">
+                                <img src="/api/placeholder/250/150" alt="Post Image" class="news-thumbnail">
+                                <div class="news-info">
+                                    <div class="news-source">
+                                        <svg class="news-source-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white">
+                                            <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+                                        </svg>
+                                        <span class="news-source-name">@TechReporter</span>
+                                    </div>
+                                    <div class="news-title">Person just announced a groundbreaking partnership with tech giant</div>
+                                    <div class="news-time">5 hours ago • 42K likes</div>
+                                </div>
+                            </div>
+                            <div class="news-item">
+                                <img src="/api/placeholder/250/150" alt="Post Image" class="news-thumbnail">
+                                <div class="news-info">
+                                    <div class="news-source">
+                                        <svg class="news-source-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white">
+                                            <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+                                        </svg>
+                                        <span class="news-source-name">@IndustryInsider</span>
+                                    </div>
+                                    <div class="news-title">BREAKING: Person responds to controversy with official statement</div>
+                                    <div class="news-time">1 day ago • 12.8K likes</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="news-content" id="articles-content">
+                        <div class="news-list">
+                            <!-- Sample Articles -->
+                            <div class="news-item">
+                                <img src="/api/placeholder/250/150" alt="Article Image" class="news-thumbnail">
+                                <div class="news-info">
+                                    <div class="news-source">
+                                        <svg class="news-source-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="white">
+                                            <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/>
+                                        </svg>
+                                        <span class="news-source-name">TechNews</span>
+                                    </div>
+                                    <div class="news-title">In-Depth Analysis: How Person is Changing the Industry</div>
+                                    <div class="news-time">2 days ago • 15 min read</div>
+                                </div>
+                            </div>
+                            <div class="news-item">
+                                <img src="/api/placeholder/250/150" alt="Article Image" class="news-thumbnail">
+                                <div class="news-info">
+                                    <div class="news-source">
+                                        <svg class="news-source-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="white">
+                                            <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/>
+                                        </svg>
+                                        <span class="news-source-name">BusinessDaily</span>
+                                    </div>
+                                    <div class="news-title">Person's Latest Project Receives Record Funding</div>
+                                    <div class="news-time">4 days ago • 8 min read</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Product Profile Container (hidden by default) -->
+        <div class="product-profile-container" id="product-profile-container">
+            <div class="profile-left">
+                <div class="profile-photo-container">
+                    <img id="product-photo" class="profile-photo" src="/api/placeholder/400/400" alt="Product Photo">
+                    <div class="profile-actions">
+                        <button class="action-btn save-btn" id="product-save-btn" title="Save product">
+                            <svg class="action-icon save-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                                <path d="M17 3H7c-1.1 0-2 .9-2 2v16l7-3 7 3V5c0-1.1-.9-2-2-2z"/>
+                            </svg>
+                        </button>
+                        <button class="action-btn notification-btn" id="product-notification-btn" title="Set notifications">
+                            <svg class="notification-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6v-5c0-3.07-1.64-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.63 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z"/>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="product-buy-section">
+                    <div class="product-price" id="product-price">$99.99</div>
+                    <button class="product-buy-button">Buy Now</button>
+                </div>
+                
+                <div class="product-details">
+                    <div class="product-details-title">Product Details</div>
+                    <div class="product-specs" id="product-specs">
+                        <div class="spec-name">Brand:</div>
+                        <div class="spec-value">ExToBrand</div>
+                        <div class="spec-name">Category:</div>
+                        <div class="spec-value">Technology</div>
+                        <div class="spec-name">Release Date:</div>
+                        <div class="spec-value">March 15, 2025</div>
+                        <div class="spec-name">Availability:</div>
+                        <div class="spec-value">In Stock</div>
+                        <div class="spec-name">Rating:</div>
+                        <div class="spec-value">4.8/5 (243 reviews)</div>
+                    </div>
+                </div>
+                
+                <div class="social-links">
+                    <a href="#" class="social-link" title="Website">
+                        <svg class="social-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white">
+                            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/>
+                        </svg>
+                    </a>
+                    <a href="#" class="social-link" title="YouTube">
+                        <svg class="social-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white">
+                            <path d="M23.495 6.205a3.007 3.007 0 0 0-2.088-2.088c-1.87-.501-9.396-.501-9.396-.501s-7.507-.01-9.396.501A3.007 3.007 0 0 0 .527 6.205a31.247 31.247 0 0 0-.522 5.805 31.247 31.247 0 0 0 .522 5.783 3.007 3.007 0 0 0 2.088 2.088c1.868.502 9.396.502 9.396.502s7.506 0 9.396-.502a3.007 3.007 0 0 0 2.088-2.088 31.247 31.247 0 0 0 .5-5.783 31.247 31.247 0 0 0-.5-5.805zM9.609 15.601V8.408l6.264 3.602z"/>
+                        </svg>
+                    </a>
+                    <a href="#" class="social-link" title="Instagram">
+                        <svg class="social-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white">
+                            <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
+                        </svg>
+                    </a>
+                    <a href="#" class="social-link" title="Twitter">
+                        <svg class="social-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white">
+                            <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+                        </svg>
+                    </a>
+                    <a href="#" class="social-link" title="Pinterest">
+                        <svg class="social-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white">
+                            <path d="M12 0C5.373 0 0 5.372 0 12c0 5.084 3.163 9.426 7.627 11.174-.105-.949-.2-2.405.042-3.441.218-.937 1.407-5.965 1.407-5.965s-.359-.719-.359-1.782c0-1.668.967-2.914 2.171-2.914 1.023 0 1.518.769 1.518 1.69 0 1.029-.655 2.568-.994 3.995-.283 1.194.599 2.169 1.777 2.169 2.133 0 3.772-2.249 3.772-5.495 0-2.873-2.064-4.882-5.012-4.882-3.414 0-5.418 2.561-5.418 5.207 0 1.031.397 2.138.893 2.738.098.119.112.224.083.345l-.333 1.36c-.053.22-.174.267-.402.161-1.499-.698-2.436-2.889-2.436-4.649 0-3.785 2.75-7.262 7.929-7.262 4.163 0 7.398 2.967 7.398 6.931 0 4.136-2.607 7.464-6.227 7.464-1.216 0-2.359-.631-2.75-1.378l-.748 2.853c-.271 1.043-1.002 2.35-1.492 3.146C9.57 23.812 10.763 24 12 24c6.627 0 12-5.373 12-12 0-6.628-5.373-12-12-12z"/>
+                        </svg>
+                    </a>
+                </div>
+                
+                <div class="comments-section">
+                    <div class="comments-header">
+                        <span>Reviews</span>
+                        <span class="comment-count">243 reviews</span>
+                    </div>
+                    <div class="comment-form">
+                        <input type="text" class="comment-input" placeholder="Add a review...">
+                        <button class="comment-submit">Post</button>
+                    </div>
+                    <div class="comment-list">
+                        <!-- Sample comments -->
+                        <div class="comment-item">
+                            <div class="comment-user">
+                                <img src="/api/placeholder/24/24" alt="User Avatar" class="comment-avatar">
+                                <span class="comment-username">TechEnthusiast</span>
+                                <span class="comment-time">2 days ago</span>
+                            </div>
+                            <div class="comment-text">
+                                Absolutely love this product! The quality is excellent and it performs exactly as described. Would recommend to anyone.
+                            </div>
+                        </div>
+                        <div class="comment-item">
+                            <div class="comment-user">
+                                <img src="/api/placeholder/24/24" alt="User Avatar" class="comment-avatar">
+                                <span class="comment-username">ValueShopper</span>
+                                <span class="comment-time">1 week ago</span>
+                            </div>
+                            <div class="comment-text">
+                                Great value for the price. I've been using it for a week now and I'm impressed with how well it works. The battery life is excellent too.
+                            </div>
+                        </div>
+                        <div class="comment-item">
+                            <div class="comment-user">
+                                <img src="/api/placeholder/24/24" alt="User Avatar" class="comment-avatar">
+                                <span class="comment-username">QualityFinder</span>
+                                <span class="comment-time">2 weeks ago</span>
+                            </div>
+                            <div class="comment-text">
+                                The sentiment score is well-deserved. This product has exceeded my expectations in every way. Customer service is also top-notch.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="profile-right">
+                <div class="profile-header">
+                    <h1 class="profile-name" id="product-name">Product Name</h1>
+                    <div class="profile-metrics">
+                        <div class="metric">
+                            <div class="metric-title">Sentiment</div>
+                            <div class="metric-value positive" id="product-sentiment-value">92.45%</div>
+                        </div>
+                        <div class="metric">
+                            <div class="metric-title">Relevancy</div>
+                            <div class="metric-value" id="product-relevancy-value">1.7M</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="tabs">
+                    <div class="tab active" data-tab="product-sentiment">Sentiment</div>
+                    <div class="tab" data-tab="product-relevancy">Relevancy</div>
+                </div>
+                
+                <div class="tab-content active" id="product-sentiment-tab">
+                    <div class="graph-container">
+                        <canvas id="product-sentiment-chart"></canvas>
+                    </div>
+                </div>
+                
+                <div class="tab-content" id="product-relevancy-tab">
+                    <div class="graph-container">
+                        <canvas id="product-relevancy-chart"></canvas>
+                    </div>
+                </div>
+                
+                <div class="news-feed">
+                    <h2 class="news-header">Latest News</h2>
+                    <div class="news-tabs">
+                        <div class="news-tab active" data-news-tab="product-youtube">YouTube</div>
+                        <div class="news-tab" data-news-tab="product-tiktok">TikTok</div>
+                        <div class="news-tab" data-news-tab="product-x">Reviews</div>
+                        <div class="news-tab" data-news-tab="product-articles">Articles</div>
+                    </div>
+                    
+                    <div class="news-content active" id="product-youtube-content">
+                        <div class="news-list">
+                            <!-- Sample YouTube videos -->
+                            <div class="news-item">
+                                <img src="/api/placeholder/250/150" alt="Video Thumbnail" class="news-thumbnail">
+                                <div class="news-info">
+                                    <div class="news-source">
+                                        <svg class="news-source-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="red">
+                                            <path d="M23.495 6.205a3.007 3.007 0 0 0-2.088-2.088c-1.87-.501-9.396-.501-9.396-.501s-7.507-.01-9.396.501A3.007 3.007 0 0 0 .527 6.205a31.247 31.247 0 0 0-.522 5.805 31.247 31.247 0 0 0 .522 5.783 3.007 3.007 0 0 0 2.088 2.088c1.868.502 9.396.502 9.396.502s7.506 0 9.396-.502a3.007 3.007 0 0 0 2.088-2.088 31.247 31.247 0 0 0 .5-5.783 31.247 31.247 0 0 0-.5-5.805zM9.609 15.601V8.408l6.264 3.602z"/>
+                                        </svg>
+                                        <span class="news-source-name">TechReview</span>
+                                    </div>
+                                    <div class="news-title">Unboxing and First Impressions of the New Product</div>
+                                    <div class="news-time">2 days ago • 245K views</div>
+                                </div>
+                            </div>
+                            <div class="news-item">
+                                <img src="/api/placeholder/250/150" alt="Video Thumbnail" class="news-thumbnail">
+                                <div class="news-info">
+                                    <div class="news-source">
+                                        <svg class="news-source-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="red">
+                                            <path d="M23.495 6.205a3.007 3.007 0 0 0-2.088-2.088c-1.87-.501-9.396-.501-9.396-.501s-7.507-.01-9.396.501A3.007 3.007 0 0 0 .527 6.205a31.247 31.247 0 0 0-.522 5.805 31.247 31.247 0 0 0 .522 5.783 3.007 3.007 0 0 0 2.088 2.088c1.868.502 9.396.502 9.396.502s7.506 0 9.396-.502a3.007 3.007 0 0 0 2.088-2.088 31.247 31.247 0 0 0 .5-5.783 31.247 31.247 0 0 0-.5-5.805zM9.609 15.601V8.408l6.264 3.602z"/>
+                                        </svg>
+                                        <span class="news-source-name">GadgetTests</span>
+                                    </div>
+                                    <div class="news-title">Full Review After 30 Days of Use - Is It Worth It?</div>
+                                    <div class="news-time">1 week ago • 1.2M views</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="news-content" id="product-tiktok-content">
+                        <div class="news-list">
+                            <!-- Sample TikTok videos -->
+                            <div class="news-item">
+                                <img src="/api/placeholder/250/150" alt="TikTok Thumbnail" class="news-thumbnail">
+                                <div class="news-info">
+                                    <div class="news-source">
+                                        <svg class="news-source-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white">
+                                            <path d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.79-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.21-1.43.08-2.86-.31-4.08-1.03-2.02-1.19-3.44-3.37-3.65-5.71-.02-.5-.03-1-.01-1.49.18-1.9 1.12-3.72 2.58-4.96 1.66-1.44 3.98-2.13 6.15-1.72.02 1.48-.04 2.96-.04 4.44-.99-.32-2.15-.23-3.02.37-.63.41-1.11 1.04-1.36 1.75-.21.51-.15 1.07-.14 1.61.24 1.64 1.82 3.02 3.5 2.87 1.12-.01 2.19-.66 2.77-1.61.19-.33.4-.67.41-1.06.1-1.79.06-3.57.07-5.36.01-4.03-.01-8.05.02-12.07z"/>
+                                        </svg>
+                                        <span class="news-source-name">ProductTester</span>
+                                    </div>
+                                    <div class="news-title">5 Reasons This Product is Going Viral</div>
+                                    <div class="news-time">3 days ago • 3.4M views</div>
+                                </div>
+                            </div>
+                            <div class="news-item">
+                                <img src="/api/placeholder/250/150" alt="TikTok Thumbnail" class="news-thumbnail">
+                                <div class="news-info">
+                                    <div class="news-source">
+                                        <svg class="news-source-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white">
+                                            <path d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.79-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.21-1.43.08-2.86-.31-4.08-1.03-2.02-1.19-3.44-3.37-3.65-5.71-.02-.5-.03-1-.01-1.49.18-1.9 1.12-3.72 2.58-4.96 1.66-1.44 3.98-2.13 6.15-1.72.02 1.48-.04 2.96-.04 4.44-.99-.32-2.15-.23-3.02.37-.63.41-1.11 1.04-1.36 1.75-.21.51-.15 1.07-.14 1.61.24 1.64 1.82 3.02 3.5 2.87 1.12-.01 2.19-.66 2.77-1.61.19-.33.4-.67.41-1.06.1-1.79.06-3.57.07-5.36.01-4.03-.01-8.05.02-12.07z"/>
+                                        </svg>
+                                        <span class="news-source-name">TechTrends</span>
+                                    </div>
+                                    <div class="news-title">How This Product Changed My Daily Routine</div>
+                                    <div class="news-time">Yesterday • 1.8M views</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="news-content" id="product-x-content">
+                        <div class="news-list">
+                            <!-- Sample Reviews -->
+                            <div class="news-item">
+                                <img src="/api/placeholder/250/150" alt="Review Image" class="news-thumbnail">
+                                <div class="news-info">
+                                    <div class="news-source">
+                                        <svg class="news-source-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white">
+                                            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-5-9h10v2H7z"/>
+                                        </svg>
+                                        <span class="news-source-name">ProductReview.com</span>
+                                    </div>
+                                    <div class="news-title">Expert Review: 9/10 - "A game-changer in its category"</div>
+                                    <div class="news-time">4 days ago • 45K shares</div>
+                                </div>
+                            </div>
+                            <div class="news-item">
+                                <img src="/api/placeholder/250/150" alt="Review Image" class="news-thumbnail">
+                                <div class="news-info">
+                                    <div class="news-source">
+                                        <svg class="news-source-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white">
+                                            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-5-9h10v2H7z"/>
+                                        </svg>
+                                        <span class="news-source-name">TechInsider</span>
+                                    </div>
+                                    <div class="news-title">Why This Product Deserves Its High Sentiment Score</div>
+                                    <div class="news-time">1 week ago • 28K shares</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="news-content" id="product-articles-content">
+                        <div class="news-list">
+                            <!-- Sample Articles -->
+                            <div class="news-item">
+                                <img src="/api/placeholder/250/150" alt="Article Image" class="news-thumbnail">
+                                <div class="news-info">
+                                    <div class="news-source">
+                                        <svg class="news-source-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="white">
+                                            <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/>
+                                        </svg>
+                                        <span class="news-source-name">TechBlog</span>
+                                    </div>
+                                    <div class="news-title">In-Depth Analysis: How This Product Is Disrupting the Market</div>
+                                    <div class="news-time">3 days ago • 12 min read</div>
+                                </div>
+                            </div>
+                            <div class="news-item">
+                                <img src="/api/placeholder/250/150" alt="Article Image" class="news-thumbnail">
+                                <div class="news-info">
+                                    <div class="news-source">
+                                        <svg class="news-source-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="white">
+                                            <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/>
+                                        </svg>
+                                        <span class="news-source-name">ConsumerReport</span>
+                                    </div>
+                                    <div class="news-title">2025's Most Promising Products - Why This Made The List</div>
+                                    <div class="news-time">1 week ago • 8 min read</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Notification Modal -->
+    <div class="modal" id="notification-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Notification Settings</h3>
+                <button class="close-modal" id="close-modal">&times;</button>
+            </div>
+            <form class="notification-form" id="notification-form">
+                <div class="form-group">
+                    <label class="form-label">Sentiment Alert Threshold</label>
+                    <input type="range" class="form-control" id="sentiment-threshold" min="0" max="100" value="40">
+                    <span id="sentiment-threshold-value">40%</span>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Relevancy Alert Threshold</label>
+                    <input type="range" class="form-control" id="relevancy-threshold" min="0" max="100" value="20">
+                    <span id="relevancy-threshold-value">20%</span>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Notification Method</label>
+                    <select class="form-control" id="notification-method">
+                        <option value="email">Email</option>
+                        <option value="push">Push Notification</option>
+                        <option value="sms">SMS</option>
+                        <option value="all">All Methods</option>
+                    </select>
+                </div>
+                <button type="button" class="notification-save" id="save-notification">Save Settings</button>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Account Settings Modal -->
+    <div class="modal" id="account-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Account Settings</h3>
+                <button class="close-modal" id="close-account-modal">&times;</button>
+            </div>
+            <div class="account-form">
+                <div class="account-form-group">
+                    <label class="account-label">Email</label>
+                    <input type="email" class="account-input" id="account-email" value="johndoe@example.com">
+                    <button class="account-btn">Update Email</button>
+                </div>
+                <div class="account-form-group">
+                    <label class="account-label">Username</label>
+                    <input type="text" class="account-input" id="account-username" value="johndoe">
+                    <button class="account-btn">Update Username</button>
+                </div>
+                <div class="account-form-group">
+                    <label class="account-label">Password</label>
+                    <input type="password" class="account-input" id="account-password" placeholder="New password">
+                    <input type="password" class="account-input" id="account-password-confirm" placeholder="Confirm new password" style="margin-top: 10px;">
+                    <button class="account-btn">Update Password</button>
+                </div>
+                <div class="account-form-group">
+                    <button class="account-btn danger">Delete Account</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Pro Modal -->
+    <div class="modal" id="pro-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Upgrade to ExToBach Pro</h3>
+                <button class="close-modal" id="close-pro-modal">&times;</button>
+            </div>
+            <div class="pro-features-list">
+                <div class="pro-feature">
+                    <svg class="pro-feature-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                        <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+                    </svg>
+                    <div class="pro-feature-text">
+                        <div class="pro-feature-title">Product Verification</div>
+                        <div class="pro-feature-description">Get verified status for your products and access detailed brand analytics.</div>
+                    </div>
+                </div>
+                <div class="pro-feature">
+                    <svg class="pro-feature-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                        <path d="M20 2H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h14l4 4V4c0-1.1-.9-2-2-2zm-2 12H6v-2h12v2zm0-3H6V9h12v2zm0-3H6V6h12v2z"/>
+                    </svg>
+                    <div class="pro-feature-text">
+                        <div class="pro-feature-title">People's Feedback</div>
+                        <div class="pro-feature-description">Access comprehensive feedback across videos, social media, and more.</div>
+                    </div>
+                </div>
+                <div class="pro-feature">
+                    <svg class="pro-feature-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                        <path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/>
+                    </svg>
+                    <div class="pro-feature-text">
+                        <div class="pro-feature-title">Search Data</div>
+                        <div class="pro-feature-description">Discover how people interact with your products and profiles through search.</div>
+                    </div>
+                </div>
+            </div>
+            <div class="pro-price">
+                $9.99 <span class="pro-price-period">/ month</span>
+            </div>
+            <button class="subscribe-btn">Subscribe Now</button>
+        </div>
+    </div>
+    
+    <!-- Notification Preferences Modal -->
+    <div class="modal" id="notification-prefs-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Notification Preferences</h3>
+                <button class="close-modal" id="close-notification-prefs-modal">&times;</button>
+            </div>
+            <div class="notification-section">
+                <div class="notification-section-title">Changes</div>
+                <div class="notification-option">
+                    <input type="checkbox" id="notify-sentiment-drops" class="notification-checkbox" checked>
+                    <label for="notify-sentiment-drops" class="notification-label">Sentiment Drops</label>
+                    <div class="notification-description">Get notified when sentiment drops below your threshold</div>
+                </div>
+                <div class="notification-option">
+                    <input type="checkbox" id="notify-relevancy-changes" class="notification-checkbox" checked>
+                    <label for="notify-relevancy-changes" class="notification-label">Relevancy Changes</label>
+                    <div class="notification-description">Get notified when relevancy significantly changes</div>
+                </div>
+                <div class="notification-option">
+                    <input type="checkbox" id="notify-profile-updates" class="notification-checkbox" checked>
+                    <label for="notify-profile-updates" class="notification-label">Profile Updates</label>
+                    <div class="notification-description">Get notified when profiles you follow are updated</div>
+                </div>
+            </div>
+            <div class="notification-section">
+                <div class="notification-section-title">Trending</div>
+                <div class="notification-option">
+                    <input type="checkbox" id="notify-trending-people" class="notification-checkbox" checked>
+                    <label for="notify-trending-people" class="notification-label">Trending People</label>
+                    <div class="notification-description">Get notified about rapidly trending people</div>
+                </div>
+                <div class="notification-option">
+                    <input type="checkbox" id="notify-trending-products" class="notification-checkbox" checked>
+                    <label for="notify-trending-products" class="notification-label">Trending Products</label>
+                    <div class="notification-description">Get notified about rapidly trending products</div>
+                </div>
+            </div>
+            <div class="notification-section">
+                <div class="notification-section-title">Announcements</div>
+                <div class="notification-option">
+                    <input type="checkbox" id="notify-platform-updates" class="notification-checkbox" checked>
+                    <label for="notify-platform-updates" class="notification-label">Platform Updates</label>
+                    <div class="notification-description">Get notified about new features and platform changes</div>
+                </div>
+                <div class="notification-option">
+                    <input type="checkbox" id="notify-offers" class="notification-checkbox">
+                    <label for="notify-offers" class="notification-label">Special Offers</label>
+                    <div class="notification-description">Get notified about promotions and special offers</div>
+                </div>
+            </div>
+            <button type="button" class="notification-save">Save Preferences</button>
+        </div>
+    </div>
+    
+    <!-- Saved Items Modal -->
+    <div class="modal" id="saved-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Saved Items</h3>
+                <button class="close-modal" id="close-saved-modal">&times;</button>
+            </div>
+            <div class="tabs">
+                <div class="tab active" data-saved-tab="people">People</div>
+                <div class="tab" data-saved-tab="products">Products</div>
+            </div>
+            <div class="tab-content active" id="saved-people-tab">
+                <div class="saved-list">
+                    <div class="suggestion-item">
+                        <img class="suggestion-avatar" src="/api/placeholder/40/40?text=P" alt="Person">
+                        <div class="suggestion-info">
+                            <div class="suggestion-name">Persona</div>
+                            <div class="suggestion-meta">Sentiment: 78.45% • Relevancy: 2.3M</div>
+                        </div>
+                    </div>
+                    <div class="suggestion-item">
+                        <img class="suggestion-avatar" src="/api/placeholder/40/40?text=J" alt="Person">
+                        <div class="suggestion-info">
+                            <div class="suggestion-name">John Doe</div>
+                            <div class="suggestion-meta">Sentiment: 68.91% • Relevancy: 890K</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="tab-content" id="saved-products-tab">
+                <div class="saved-list">
+                    <div class="suggestion-item">
+                        <img class="suggestion-avatar" src="/api/placeholder/40/40?text=E" alt="Product">
+                        <div class="suggestion-info">
+                            <div class="suggestion-name">Ultra Wireless Earbuds</div>
+                            <div class="suggestion-meta">Sentiment: 92.45% • Relevancy: 1.7M</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- IMPROVED: Completely reworked JavaScript to fix chart initialization issues and add logo navigation -->
+    <script>
+        // Sample database of people
+        const peopleDatabase = {
+            'persona': {
+                name: 'Persona',
+                photo: '/api/placeholder/400/400?text=Persona',
+                sentiment: 78.45,
+                relevancy: 2300000,
+                wikipediaUrl: '#',
+                youtubeUrl: '#',
+                xUrl: '#',
+                tiktokUrl: '#',
+                instagramUrl: '#',
+                redditUrl: '#',
+                facebookUrl: '#'
+            },
+            'personb': {
+                name: 'Personb',
+                photo: '/api/placeholder/400/400?text=Personb',
+                sentiment: 65.12,
+                relevancy: 765000,
+                wikipediaUrl: '#',
+                youtubeUrl: '#',
+                xUrl: '#',
+                tiktokUrl: '#',
+                instagramUrl: '#',
+                redditUrl: '#',
+                facebookUrl: '#'
+            },
+            'personc': {
+                name: 'Personc',
+                photo: '/api/placeholder/400/400?text=Personc',
+                sentiment: 92.78,
+                relevancy: 4500000,
+                wikipediaUrl: '#',
+                youtubeUrl: '#',
+                xUrl: '#',
+                tiktokUrl: '#',
+                instagramUrl: '#',
+                redditUrl: '#',
+                facebookUrl: '#'
+            },
+            'persond': {
+                name: 'Persond',
+                photo: '/api/placeholder/400/400?text=Persond',
+                sentiment: 45.67,
+                relevancy: 1200000,
+                wikipediaUrl: '#',
+                youtubeUrl: '#',
+                xUrl: '#',
+                tiktokUrl: '#',
+                instagramUrl: '#',
+                redditUrl: '#',
+                facebookUrl: '#'
+            },
+            'persone': {
+                name: 'Persone',
+                photo: '/api/placeholder/400/400?text=Persone',
+                sentiment: 55.89,
+                relevancy: 930000,
+                wikipediaUrl: '#',
+                youtubeUrl: '#',
+                xUrl: '#',
+                tiktokUrl: '#',
+                instagramUrl: '#',
+                redditUrl: '#',
+                facebookUrl: '#'
+            },
+            'personz': {
+                name: 'Personz',
+                photo: '/api/placeholder/400/400?text=Personz',
+                sentiment: 88.23,
+                relevancy: 3100000,
+                wikipediaUrl: '#',
+                youtubeUrl: '#',
+                xUrl: '#',
+                tiktokUrl: '#',
+                instagramUrl: '#',
+                redditUrl: '#',
+                facebookUrl: '#'
+            },
+            // Examples of people with the same name
+            'john': {
+                name: 'John Smith',
+                photo: '/api/placeholder/400/400?text=John+Smith',
+                sentiment: 72.34,
+                relevancy: 1700000,
+                wikipediaUrl: '#',
+                youtubeUrl: '#',
+                xUrl: '#',
+                tiktokUrl: '#',
+                instagramUrl: '#',
+                redditUrl: '#',
+                facebookUrl: '#'
+            },
+            'john smith': {
+                name: 'John Smith',
+                photo: '/api/placeholder/400/400?text=John+Smith',
+                sentiment: 72.34,
+                relevancy: 1700000,
+                wikipediaUrl: '#',
+                youtubeUrl: '#',
+                xUrl: '#',
+                tiktokUrl: '#',
+                instagramUrl: '#',
+                redditUrl: '#',
+                facebookUrl: '#'
+            },
+            'john doe': {
+                name: 'John Doe',
+                photo: '/api/placeholder/400/400?text=John+Doe',
+                sentiment: 68.91,
+                relevancy: 890000,
+                wikipediaUrl: '#',
+                youtubeUrl: '#',
+                xUrl: '#',
+                tiktokUrl: '#',
+                instagramUrl: '#',
+                redditUrl: '#',
+                facebookUrl: '#'
+            }
+        };
+        
+        // Sample database of products
+        const productsDatabase = {
+            'product1': {
+                name: 'Ultra Wireless Earbuds',
+                photo: '/api/placeholder/400/400?text=Earbuds',
+                sentiment: 92.45,
+                relevancy: 1700000,
+                price: '$149.99',
+                category: 'tech',
+                description: 'Next-generation wireless earbuds with noise cancellation and 24-hour battery life.',
+                specs: {
+                    'Brand': 'ExToBrand',
+                    'Category': 'Technology',
+                    'Release Date': 'February 10, 2025',
+                    'Availability': 'In Stock',
+                    'Rating': '4.8/5 (243 reviews)',
+                    'Battery Life': '24 hours',
+                    'Wireless Range': '30 feet',
+                    'Water Resistance': 'IPX7'
+                }
+            },
+            'product2': {
+                name: 'Smart Fitness Tracker',
+                photo: '/api/placeholder/400/400?text=Fitness+Tracker',
+                sentiment: 87.32,
+                relevancy: 1200000,
+                price: '$89.99',
+                category: 'tech',
+                description: 'Advanced fitness tracker with heart rate monitoring, sleep analysis, and 7-day battery life.',
+                specs: {
+                    'Brand': 'ExToBrand',
+                    'Category': 'Technology',
+                    'Release Date': 'January 5, 2025',
+                    'Availability': 'In Stock',
+                    'Rating': '4.6/5 (178 reviews)',
+                    'Battery Life': '7 days',
+                    'Water Resistance': '5 ATM',
+                    'Display': 'OLED Touch Screen'
+                }
+            },
+            'product3': {
+                name: 'Premium Leather Jacket',
+                photo: '/api/placeholder/400/400?text=Leather+Jacket',
+                sentiment: 89.67,
+                relevancy: 950000,
+                price: '$299.99',
+                category: 'fashion',
+                description: 'Luxurious genuine leather jacket with premium stitching and comfortable fit.',
+                specs: {
+                    'Brand': 'ExToFashion',
+                    'Category': 'Fashion',
+                    'Release Date': 'March 1, 2025',
+                    'Availability': 'Limited Stock',
+                    'Rating': '4.7/5 (92 reviews)',
+                    'Material': 'Genuine Leather',
+                    'Care': 'Professional Clean Only',
+                    'Sizes': 'S, M, L, XL, XXL'
+                }
+            },
+            'product4': {
+                name: 'Smart Home Hub',
+                photo: '/api/placeholder/400/400?text=Smart+Home+Hub',
+                sentiment: 94.21,
+                relevancy: 2100000,
+                price: '$129.99',
+                category: 'home',
+                description: 'Central smart home control unit with voice recognition and compatibility with all major smart devices.',
+                specs: {
+                    'Brand': 'ExToHome',
+                    'Category': 'Home & Kitchen',
+                    'Release Date': 'December 15, 2024',
+                    'Availability': 'In Stock',
+                    'Rating': '4.9/5 (317 reviews)',
+                    'Compatibility': 'All major smart home devices',
+                    'Connectivity': 'Wi-Fi, Bluetooth, Zigbee',
+                    'Voice Assistants': 'Built-in'
+                }
+            },
+            'product5': {
+                name: 'Professional Skincare Set',
+                photo: '/api/placeholder/400/400?text=Skincare+Set',
+                sentiment: 91.89,
+                relevancy: 870000,
+                price: '$79.99',
+                category: 'beauty',
+                description: 'Complete skincare regimen with cleanser, toner, serum, and moisturizer for all skin types.',
+                specs: {
+                    'Brand': 'ExToBeauty',
+                    'Category': 'Beauty & Personal Care',
+                    'Release Date': 'February 1, 2025',
+                    'Availability': 'In Stock',
+                    'Rating': '4.8/5 (124 reviews)',
+                    'Skin Type': 'All Skin Types',
+                    'Ingredients': 'Cruelty-Free, Paraben-Free',
+                    'Set Includes': '4 Full-Size Products'
+                }
+            },
+            'product6': {
+                name: 'Ultra-Light Running Shoes',
+                photo: '/api/placeholder/400/400?text=Running+Shoes',
+                sentiment: 88.76,
+                relevancy: 1500000,
+                price: '$129.99',
+                category: 'sports',
+                description: 'Performance running shoes with responsive cushioning and breathable mesh upper.',
+                specs: {
+                    'Brand': 'ExToSports',
+                    'Category': 'Sports & Outdoors',
+                    'Release Date': 'January 20, 2025',
+                    'Availability': 'In Stock',
+                    'Rating': '4.7/5 (208 reviews)',
+                    'Weight': 'Ultra-Light (8.5 oz)',
+                    'Upper': 'Breathable Mesh',
+                    'Sizes': '7-13 (US Men\'s)'
+                }
+            },
+            'product7': {
+                name: 'Portable Blender',
+                photo: '/api/placeholder/400/400?text=Portable+Blender',
+                sentiment: 90.54,
+                relevancy: 780000,
+                price: '$49.99',
+                category: 'home',
+                description: 'USB-rechargeable portable blender for smoothies and shakes on the go.',
+                specs: {
+                    'Brand': 'ExToHome',
+                    'Category': 'Home & Kitchen',
+                    'Release Date': 'March 5, 2025',
+                    'Availability': 'In Stock',
+                    'Rating': '4.7/5 (156 reviews)',
+                    'Capacity': '16 oz',
+                    'Battery Life': '20 blends per charge',
+                    'Dishwasher Safe': 'Yes (cup only)'
+                }
+            },
+            'product8': {
+                name: 'Designer Sunglasses',
+                photo: '/api/placeholder/400/400?text=Sunglasses',
+                sentiment: 86.32,
+                relevancy: 650000,
+                price: '$199.99',
+                category: 'fashion',
+                description: 'Premium polarized sunglasses with UV protection and stylish design.',
+                specs: {
+                    'Brand': 'ExToFashion',
+                    'Category': 'Fashion',
+                    'Release Date': 'February 20, 2025',
+                    'Availability': 'In Stock',
+                    'Rating': '4.6/5 (87 reviews)',
+                    'Frame Material': 'Acetate',
+                    'Lens': 'Polarized with UV Protection',
+                    'Style': 'Unisex'
+                }
+            },
+            'product9': {
+                name: 'Smart Water Bottle',
+                photo: '/api/placeholder/400/400?text=Smart+Bottle',
+                sentiment: 89.98,
+                relevancy: 720000,
+                price: '$59.99',
+                category: 'sports',
+                description: 'Intelligent water bottle that tracks hydration and glows to remind you to drink.',
+                specs: {
+                    'Brand': 'ExToSports',
+                    'Category': 'Sports & Outdoors',
+                    'Release Date': 'January 15, 2025',
+                    'Availability': 'In Stock',
+                    'Rating': '4.7/5 (113 reviews)',
+                    'Capacity': '24 oz',
+                    'Battery Life': '30 days',
+                    'Connectivity': 'Bluetooth to smartphone app'
+                }
+            },
+            'product10': {
+                name: 'Anti-Aging Cream',
+                photo: '/api/placeholder/400/400?text=Anti-Aging+Cream',
+                sentiment: 93.21,
+                relevancy: 1100000,
+                price: '$69.99',
+                category: 'beauty',
+                description: 'Advanced anti-aging formula with peptides and hyaluronic acid for visible results.',
+                specs: {
+                    'Brand': 'ExToBeauty',
+                    'Category': 'Beauty & Personal Care',
+                    'Release Date': 'December 10, 2024',
+                    'Availability': 'In Stock',
+                    'Rating': '4.9/5 (267 reviews)',
+                    'Size': '50ml',
+                    'Ingredients': 'Peptides, Hyaluronic Acid, Vitamin C',
+                    'For': 'All Skin Types'
+                }
+            }
+        };
+        
+        // Format large numbers with K, M, B, etc.
+        function formatNumber(num) {
+            if (num >= 1000000000000000000000000) {
+                return (num / 1000000000000000000000000).toFixed(1) + 'Y';
+            } else if (num >= 1000000000000000000000) {
+                return (num / 1000000000000000000000).toFixed(1) + 'Z';
+            } else if (num >= 1000000000000000000) {
+                return (num / 1000000000000000000).toFixed(1) + 'E';
+            } else if (num >= 1000000000000000) {
+                return (num / 1000000000000000).toFixed(1) + 'P';
+            } else if (num >= 1000000000000) {
+                return (num / 1000000000000).toFixed(1) + 'T';
+            } else if (num >= 1000000000) {
+                return (num / 1000000000).toFixed(1) + 'B';
+            } else if (num >= 1000000) {
+                return (num / 1000000).toFixed(1) + 'M';
+            } else if (num >= 1000) {
+                return (num / 1000).toFixed(1) + 'K';
+            } else {
+                return num.toString();
+            }
+        }
+        
+        // Function to determine sentiment color
+        function getSentimentColor(sentiment) {
+            if (sentiment >= 70) {
+                return 'positive';
+            } else if (sentiment >= 40) {
+                return 'neutral';
+            } else {
+                return 'negative';
+            }
+        }
+        
+        // DOM elements - safely get elements with error handling
+        function getElement(id) {
+            const element = document.getElementById(id);
+            if (!element) {
+                console.warn(`Element with ID '${id}' not found`);
+            }
+            return element;
+        }
+        
+        // Function to safely add event listeners
+        function addSafeEventListener(element, event, handler) {
+            if (element) {
+                element.addEventListener(event, handler);
+            }
+        }
+        
+        // Function to go back to home (clear search)
+        function goHome() {
+            // Hide profile and product containers
+            const profileContainer = getElement('profile-container');
+            const productProfileContainer = getElement('product-profile-container');
+            const header = getElement('header');
+            const topProducts = getElement('top-products');
+            
+            if (profileContainer) profileContainer.style.display = 'none';
+            if (productProfileContainer) productProfileContainer.style.display = 'none';
+            if (header) header.classList.remove('minimized');
+            if (topProducts) topProducts.style.display = 'block';
+            
+            // Clear search input
+            const searchInput = getElement('search-input');
+            if (searchInput) searchInput.value = '';
+            
+            // Hide search suggestions
+            const searchSuggestions = getElement('search-suggestions');
+            if (searchSuggestions) searchSuggestions.style.display = 'none';
+            
+            // Scroll to top
+            window.scrollTo(0, 0);
+        }
+        
+        // Initialize charts with dummy data - FIXED with proper error handling
+        let sentimentChart;
+        let relevancyChart;
+        let productSentimentChart;
+        let productRelevancyChart;
+        
+        // Initialize people charts with proper error handling
+        function initCharts() {
+            // Check if Chart.js is loaded
+            if (typeof Chart === 'undefined') {
+                console.error('Chart.js is not loaded');
+                return;
+            }
+            
+            // Check if canvases exist
+            const sentimentCanvas = document.getElementById('sentiment-chart');
+            const relevancyCanvas = document.getElementById('relevancy-chart');
+            
+            if (!sentimentCanvas || !relevancyCanvas) {
+                console.warn('One or more chart canvases not found. Charts will initialize when they become available.');
+                return;
+            }
+            
+            try {
+                // Sentiment chart data (10 years)
+                const sentimentData = {
+                    labels: ['2015', '2016', '2017', '2018', '2019', '2020', '2021', '2022', '2023', '2024', '2025'],
+                    datasets: [{
+                        label: 'Sentiment',
+                        data: [45.2, 52.8, 60.3, 58.9, 65.2, 70.5, 68.1, 72.3, 75.8, 78.4, 78.45],
+                        borderColor: '#4285f4',
+                        backgroundColor: 'rgba(66, 133, 244, 0.1)',
+                        fill: true,
+                        tension: 0.3,
+                        pointRadius: 4,
+                        pointBackgroundColor: '#4285f4'
+                    }]
+                };
+                
+                // Relevancy chart data (7 days)
+                const relevancyData = {
+                    labels: ['6 days ago', '5 days ago', '4 days ago', '3 days ago', '2 days ago', 'Yesterday', 'Today'],
+                    datasets: [{
+                        label: 'Relevancy',
+                        data: [1200000, 1500000, 1800000, 2100000, 1900000, 2200000, 2300000],
+                        borderColor: '#34a853',
+                        backgroundColor: 'rgba(52, 168, 83, 0.1)',
+                        fill: true,
+                        tension: 0.3,
+                        pointRadius: 4,
+                        pointBackgroundColor: '#34a853'
+                    }]
+                };
+                
+                // Chart configuration options
+                const chartOptions = {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            mode: 'index',
+                            intersect: false,
+                            backgroundColor: 'rgba(40, 40, 40, 0.8)',
+                            titleColor: '#ffffff',
+                            bodyColor: '#ffffff',
+                            borderColor: 'rgba(100, 100, 100, 0.2)',
+                            borderWidth: 1
+                        }
+                    },
+                    scales: {
+                        x: {
+                            grid: {
+                                color: 'rgba(100, 100, 100, 0.2)'
+                            },
+                            ticks: {
+                                color: '#a0a0a0'
+                            }
+                        },
+                        y: {
+                            grid: {
+                                color: 'rgba(100, 100, 100, 0.2)'
+                            },
+                            ticks: {
+                                color: '#a0a0a0'
+                            }
+                        }
+                    }
+                };
+                
+                // Initialize sentiment chart
+                const sentimentCtx = sentimentCanvas.getContext('2d');
+                // Destroy existing chart if it exists
+                if (sentimentChart) {
+                    sentimentChart.destroy();
+                }
+                
+                sentimentChart = new Chart(sentimentCtx, {
+                    type: 'line',
+                    data: sentimentData,
+                    options: {
+                        ...chartOptions,
+                        scales: {
+                            ...chartOptions.scales,
+                            y: {
+                                ...chartOptions.scales.y,
+                                min: 0,
+                                max: 100,
+                                ticks: {
+                                    ...chartOptions.scales.y.ticks,
+                                    callback: function(value) {
+                                        return value + '%';
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+                
+                // Initialize relevancy chart
+                const relevancyCtx = relevancyCanvas.getContext('2d');
+                // Destroy existing chart if it exists
+                if (relevancyChart) {
+                    relevancyChart.destroy();
+                }
+                
+                relevancyChart = new Chart(relevancyCtx, {
+                    type: 'line',
+                    data: relevancyData,
+                    options: {
+                        ...chartOptions,
+                        scales: {
+                            ...chartOptions.scales,
+                            y: {
+                                ...chartOptions.scales.y,
+                                ticks: {
+                                    ...chartOptions.scales.y.ticks,
+                                    callback: function(value) {
+                                        return formatNumber(value);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+                
+                console.log('Person charts initialized successfully');
+            } catch (error) {
+                console.error('Error initializing charts:', error);
+            }
+        }
+        
+        // Initialize product charts with proper error handling
+        function initProductCharts() {
+            // Check if Chart.js is loaded
+            if (typeof Chart === 'undefined') {
+                console.error('Chart.js is not loaded');
+                return;
+            }
+            
+            // Check if canvases exist
+            const productSentimentCanvas = document.getElementById('product-sentiment-chart');
+            const productRelevancyCanvas = document.getElementById('product-relevancy-chart');
+            
+            if (!productSentimentCanvas || !productRelevancyCanvas) {
+                console.warn('One or more product chart canvases not found. Charts will initialize when they become available.');
+                return;
+            }
+            
+            try {
+                // Product Sentiment chart data (10 years)
+                const productSentimentData = {
+                    labels: ['2015', '2016', '2017', '2018', '2019', '2020', '2021', '2022', '2023', '2024', '2025'],
+                    datasets: [{
+                        label: 'Sentiment',
+                        data: [75.6, 78.9, 82.3, 84.5, 86.1, 89.2, 90.5, 91.8, 92.3, 92.4, 92.45],
+                        borderColor: '#4285f4',
+                        backgroundColor: 'rgba(66, 133, 244, 0.1)',
+                        fill: true,
+                        tension: 0.3,
+                        pointRadius: 4,
+                        pointBackgroundColor: '#4285f4'
+                    }]
+                };
+                
+                // Product Relevancy chart data (7 days)
+                const productRelevancyData = {
+                    labels: ['6 days ago', '5 days ago', '4 days ago', '3 days ago', '2 days ago', 'Yesterday', 'Today'],
+                    datasets: [{
+                        label: 'Relevancy',
+                        data: [1000000, 1200000, 1350000, 1450000, 1550000, 1650000, 1700000],
+                        borderColor: '#34a853',
+                        backgroundColor: 'rgba(52, 168, 83, 0.1)',
+                        fill: true,
+                        tension: 0.3,
+                        pointRadius: 4,
+                        pointBackgroundColor: '#34a853'
+                    }]
+                };
+                
+                // Chart configuration options
+                const chartOptions = {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            mode: 'index',
+                            intersect: false,
+                            backgroundColor: 'rgba(40, 40, 40, 0.8)',
+                            titleColor: '#ffffff',
+                            bodyColor: '#ffffff',
+                            borderColor: 'rgba(100, 100, 100, 0.2)',
+                            borderWidth: 1
+                        }
+                    },
+                    scales: {
+                        x: {
+                            grid: {
+                                color: 'rgba(100, 100, 100, 0.2)'
+                            },
+                            ticks: {
+                                color: '#a0a0a0'
+                            }
+                        },
+                        y: {
+                            grid: {
+                                color: 'rgba(100, 100, 100, 0.2)'
+                            },
+                            ticks: {
+                                color: '#a0a0a0'
+                            }
+                        }
+                    }
+                };
+                
+                // Initialize product sentiment chart
+                const productSentimentCtx = productSentimentCanvas.getContext('2d');
+                // Destroy existing chart if it exists
+                if (productSentimentChart) {
+                    productSentimentChart.destroy();
+                }
+                
+                productSentimentChart = new Chart(productSentimentCtx, {
+                    type: 'line',
+                    data: productSentimentData,
+                    options: {
+                        ...chartOptions,
+                        scales: {
+                            ...chartOptions.scales,
+                            y: {
+                                ...chartOptions.scales.y,
+                                min: 0,
+                                max: 100,
+                                ticks: {
+                                    ...chartOptions.scales.y.ticks,
+                                    callback: function(value) {
+                                        return value + '%';
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+                
+                // Initialize product relevancy chart
+                const productRelevancyCtx = productRelevancyCanvas.getContext('2d');
+                // Destroy existing chart if it exists
+                if (productRelevancyChart) {
+                    productRelevancyChart.destroy();
+                }
+                
+                productRelevancyChart = new Chart(productRelevancyCtx, {
+                    type: 'line',
+                    data: productRelevancyData,
+                    options: {
+                        ...chartOptions,
+                        scales: {
+                            ...chartOptions.scales,
+                            y: {
+                                ...chartOptions.scales.y,
+                                ticks: {
+                                    ...chartOptions.scales.y.ticks,
+                                    callback: function(value) {
+                                        return formatNumber(value);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+                
+                console.log('Product charts initialized successfully');
+            } catch (error) {
+                console.error('Error initializing product charts:', error);
+            }
+        }
+        
+        // Populate products and people grid
+        function populateGrid(viewType = 'products', sortBy = 'sentiment', category = 'all') {
+            const productsGrid = getElement('products-grid');
+            if (!productsGrid) return;
+            
+            productsGrid.innerHTML = '';
+            
+            // Set the title based on current view
+            const titleElement = getElement('top-list-title');
+            if (titleElement) {
+                titleElement.textContent = `Top ${viewType.charAt(0).toUpperCase() + viewType.slice(1)} by ${sortBy.charAt(0).toUpperCase() + sortBy.slice(1)}`;
+            }
+            
+            // Update active button in the view toggle
+            document.querySelectorAll('.view-btn').forEach(btn => {
+                if (btn.getAttribute('data-view') === viewType && btn.getAttribute('data-sort') === sortBy) {
+                    btn.classList.add('active');
+                } else {
+                    btn.classList.remove('active');
+                }
+            });
+            
+            if (viewType === 'products') {
+                // Sort products by the selected criteria
+                const sortedProducts = Object.entries(productsDatabase)
+                    .filter(([_, product]) => category === 'all' || product.category === category)
+                    .sort((a, b) => {
+                        if (sortBy === 'sentiment') {
+                            return b[1].sentiment - a[1].sentiment;
+                        } else { // relevancy
+                            return b[1].relevancy - a[1].relevancy;
+                        }
+                    })
+                    .slice(0, 10); // Top 10 products
+                    
+                sortedProducts.forEach(([key, product]) => {
+                    const productCard = document.createElement('div');
+                    productCard.className = 'product-card';
+                    productCard.innerHTML = `
+                        <img src="${product.photo}" alt="${product.name}" class="product-image">
+                        <div class="product-info">
+                            <div class="product-name">${product.name}</div>
+                            <div class="product-metrics">
+                                <div class="product-metric">
+                                    <span class="metric-title">Sentiment: </span>
+                                    <span class="metric-value ${getSentimentColor(product.sentiment)}">${product.sentiment.toFixed(2)}%</span>
+                                </div>
+                                <div class="product-metric">
+                                    <span class="metric-title">Relevancy: </span>
+                                    <span class="metric-value">${formatNumber(product.relevancy)}</span>
+                                </div>
+                            </div>
+                            <div class="product-description">${product.description}</div>
+                            <button class="buy-button">Buy</button>
+                        </div>
+                    `;
+                    
+                    productCard.addEventListener('click', (e) => {
+                        if (e.target.classList.contains('buy-button')) {
+                            // Handle buy button click
+                            alert(`Adding ${product.name} to cart!`);
+                            e.stopPropagation(); // Prevent card click from triggering
+                        } else {
+                            // Load product profile
+                            loadProductProfile(key);
+                        }
+                    });
+                    
+                    productsGrid.appendChild(productCard);
+                });
+            } else {
+                // Sort people by the selected criteria
+                const sortedPeople = Object.entries(peopleDatabase)
+                    .sort((a, b) => {
+                        if (sortBy === 'sentiment') {
+                            return b[1].sentiment - a[1].sentiment;
+                        } else { // relevancy
+                            return b[1].relevancy - a[1].relevancy;
+                        }
+                    })
+                    .slice(0, 10); // Top 10 people
+                    
+                sortedPeople.forEach(([key, person]) => {
+                    const personCard = document.createElement('div');
+                    personCard.className = 'product-card'; // Reuse the same styling
+                    personCard.innerHTML = `
+                        <img src="${person.photo}" alt="${person.name}" class="product-image">
+                        <div class="product-info">
+                            <div class="product-name">${person.name}</div>
+                            <div class="product-metrics">
+                                <div class="product-metric">
+                                    <span class="metric-title">Sentiment: </span>
+                                    <span class="metric-value ${getSentimentColor(person.sentiment)}">${person.sentiment.toFixed(2)}%</span>
+                                </div>
+                                <div class="product-metric">
+                                    <span class="metric-title">Relevancy: </span>
+                                    <span class="metric-value">${formatNumber(person.relevancy)}</span>
+                                </div>
+                            </div>
+                            <div class="product-description">Person profile with sentiment and relevancy data</div>
+                            <button class="buy-button">View</button>
+                        </div>
+                    `;
+                    
+                    personCard.addEventListener('click', (e) => {
+                        if (e.target.classList.contains('buy-button')) {
+                            loadProfile(key);
+                            e.stopPropagation(); // Prevent card click from triggering
+                        } else {
+                            // Load person profile
+                            loadProfile(key);
+                        }
+                    });
+                    
+                    productsGrid.appendChild(personCard);
+                });
+            }
+        }
+        
+        // Search functionality
+        function handleSearch() {
+            const searchInput = getElement('search-input');
+            const searchSuggestions = getElement('search-suggestions');
+            
+            if (!searchInput || !searchSuggestions) return;
+            
+            const query = searchInput.value.trim().toLowerCase();
+            
+            if (query.length === 0) {
+                searchSuggestions.style.display = 'none';
+                return;
+            }
+            
+            // Check for matching people
+            const matchingPeople = Object.entries(peopleDatabase).filter(([key, person]) => {
+                return key.includes(query) || person.name.toLowerCase().includes(query);
+            });
+            
+            // Check for matching products
+            const matchingProducts = Object.entries(productsDatabase).filter(([key, product]) => {
+                return key.includes(query) || product.name.toLowerCase().includes(query);
+            });
+            
+            const totalMatches = matchingPeople.length + matchingProducts.length;
+            
+            if (totalMatches === 0) {
+                searchSuggestions.style.display = 'none';
+                return;
+            }
+            
+            if (totalMatches === 1) {
+                // Direct match
+                if (matchingPeople.length === 1) {
+                    loadProfile(matchingPeople[0][0]);
+                } else {
+                    loadProductProfile(matchingProducts[0][0]);
+                }
+                searchSuggestions.style.display = 'none';
+                searchInput.value = '';
+                return;
+            }
+            
+            // Show suggestions
+            searchSuggestions.innerHTML = '';
+            
+            // Add people suggestions
+            matchingPeople.forEach(([key, person]) => {
+                const suggestionItem = document.createElement('div');
+                suggestionItem.className = 'suggestion-item';
+                suggestionItem.innerHTML = `
+                    <img class="suggestion-avatar" src="${person.photo}" alt="${person.name}">
+                    <div class="suggestion-info">
+                        <div class="suggestion-name">${person.name}</div>
+                        <div class="suggestion-meta">Person • Sentiment: ${person.sentiment.toFixed(2)}% • Relevancy: ${formatNumber(person.relevancy)}</div>
+                    </div>
+                `;
+                suggestionItem.addEventListener('click', () => {
+                    loadProfile(key);
+                    searchSuggestions.style.display = 'none';
+                    searchInput.value = '';
+                });
+                searchSuggestions.appendChild(suggestionItem);
+            });
+            
+            // Add product suggestions
+            matchingProducts.forEach(([key, product]) => {
+                const suggestionItem = document.createElement('div');
+                suggestionItem.className = 'suggestion-item';
+                suggestionItem.innerHTML = `
+                    <img class="suggestion-avatar" src="${product.photo}" alt="${product.name}">
+                    <div class="suggestion-info">
+                        <div class="suggestion-name">${product.name}</div>
+                        <div class="suggestion-meta">Product • Sentiment: ${product.sentiment.toFixed(2)}% • Relevancy: ${formatNumber(product.relevancy)}</div>
+                    </div>
+                `;
+                suggestionItem.addEventListener('click', () => {
+                    loadProductProfile(key);
+                    searchSuggestions.style.display = 'none';
+                    searchInput.value = '';
+                });
+                searchSuggestions.appendChild(suggestionItem);
+            });
+            
+            searchSuggestions.style.display = 'block';
+        }
+        
+        // Load profile data
+        function loadProfile(personKey) {
+            const person = peopleDatabase[personKey];
+            
+            if (!person) return;
+            
+            // Get DOM elements
+            const header = getElement('header');
+            const topProducts = getElement('top-products');
+            const profileContainer = getElement('profile-container');
+            const productProfileContainer = getElement('product-profile-container');
+            const profileName = getElement('profile-name');
+            const profilePhoto = getElement('profile-photo');
+            const sentimentValue = getElement('sentiment-value');
+            const relevancyValue = getElement('relevancy-value');
+            
+            // Update header and hide products
+            if (header) header.classList.add('minimized');
+            if (topProducts) topProducts.style.display = 'none';
+            
+            // Show profile container and hide product profile
+            if (profileContainer) profileContainer.style.display = 'grid';
+            if (productProfileContainer) productProfileContainer.style.display = 'none';
+            
+            // Update profile info
+            if (profileName) profileName.textContent = person.name;
+            if (profilePhoto) {
+                profilePhoto.src = person.photo;
+                profilePhoto.alt = person.name;
+            }
+            
+            // Update metrics - showing LATEST sentiment and relevancy values instead of average
+            if (sentimentValue) {
+                // Use the latest value (last in the data array)
+                const latestSentiment = person.sentiment; // Latest value from the database
+                sentimentValue.textContent = latestSentiment.toFixed(2) + '%';
+                sentimentValue.className = `metric-value ${getSentimentColor(latestSentiment)}`;
+            }
+            if (relevancyValue) {
+                // Use the latest value (last in the data array)
+                const latestRelevancy = person.relevancy; // Latest value from the database
+                relevancyValue.textContent = formatNumber(latestRelevancy);
+            }
+            
+            // Initialize charts with a slight delay to ensure DOM is ready
+            setTimeout(() => {
+                initCharts();
+            }, 100);
+            
+            // Set active tab to sentiment by default
+            const activeTabs = document.querySelectorAll('.tab.active');
+            activeTabs.forEach(tab => {
+                if (profileContainer.contains(tab)) {
+                    tab.classList.remove('active');
+                }
+            });
+            
+            const sentimentTab = profileContainer.querySelector('.tab[data-tab="sentiment"]');
+            if (sentimentTab) sentimentTab.classList.add('active');
+            
+            const activeContents = document.querySelectorAll('.tab-content.active');
+            activeContents.forEach(content => {
+                if (profileContainer.contains(content)) {
+                    content.classList.remove('active');
+                }
+            });
+            
+            const sentimentContent = getElement('sentiment-tab');
+            if (sentimentContent) sentimentContent.classList.add('active');
+            
+            // Set active news tab to YouTube by default
+            const activeNewsTabs = profileContainer.querySelectorAll('.news-tab.active');
+            activeNewsTabs.forEach(tab => tab.classList.remove('active'));
+            
+            const youtubeTab = profileContainer.querySelector('.news-tab[data-news-tab="youtube"]');
+            if (youtubeTab) youtubeTab.classList.add('active');
+            
+            const activeNewsContents = profileContainer.querySelectorAll('.news-content.active');
+            activeNewsContents.forEach(content => content.classList.remove('active'));
+            
+            const youtubeContent = getElement('youtube-content');
+            if (youtubeContent) youtubeContent.classList.add('active');
+            
+            // Scroll to top
+            window.scrollTo(0, 0);
+        }
+        
+        // Load product profile data
+        function loadProductProfile(productKey) {
+            const product = productsDatabase[productKey];
+            
+            if (!product) return;
+            
+            // Get DOM elements
+            const header = getElement('header');
+            const topProducts = getElement('top-products');
+            const profileContainer = getElement('profile-container');
+            const productProfileContainer = getElement('product-profile-container');
+            
+            // Update header and hide products
+            if (header) header.classList.add('minimized');
+            if (topProducts) topProducts.style.display = 'none';
+            
+            // Show product profile container and hide person profile
+            if (productProfileContainer) productProfileContainer.style.display = 'grid';
+            if (profileContainer) profileContainer.style.display = 'none';
+            
+            // Update product info
+            const productName = getElement('product-name');
+            const productPhoto = getElement('product-photo');
+            const productPrice = getElement('product-price');
+            const productSentimentValue = getElement('product-sentiment-value');
+            const productRelevancyValue = getElement('product-relevancy-value');
+            
+            if (productName) productName.textContent = product.name;
+            if (productPhoto) {
+                productPhoto.src = product.photo;
+                productPhoto.alt = product.name;
+            }
+            if (productPrice) productPrice.textContent = product.price;
+            
+            // Update metrics - showing LATEST values instead of averages
+            if (productSentimentValue) {
+                // Use the latest value
+                const latestSentiment = product.sentiment; // Latest value from the database
+                productSentimentValue.textContent = latestSentiment.toFixed(2) + '%';
+                productSentimentValue.className = `metric-value ${getSentimentColor(latestSentiment)}`;
+            }
+            if (productRelevancyValue) {
+                // Use the latest value
+                const latestRelevancy = product.relevancy; // Latest value from the database
+                productRelevancyValue.textContent = formatNumber(latestRelevancy);
+            }
+            
+            // Update product specs
+            const specsContainer = getElement('product-specs');
+            if (specsContainer) {
+                specsContainer.innerHTML = '';
+                
+                for (const [key, value] of Object.entries(product.specs)) {
+                    const specRow = document.createElement('div');
+                    specRow.className = 'spec-name';
+                    specRow.textContent = key + ':';
+                    specsContainer.appendChild(specRow);
+                    
+                    const valueRow = document.createElement('div');
+                    valueRow.className = 'spec-value';
+                    valueRow.textContent = value;
+                    specsContainer.appendChild(valueRow);
+                }
+            }
+            
+            // Initialize product charts with a slight delay
+            setTimeout(() => {
+                initProductCharts();
+            }, 100);
+            
+            // Set active tab to sentiment by default
+            if (productProfileContainer) {
+                const productTabs = productProfileContainer.querySelectorAll('.tab');
+                productTabs.forEach(tab => tab.classList.remove('active'));
+                const sentimentTab = productProfileContainer.querySelector('.tab[data-tab="product-sentiment"]');
+                if (sentimentTab) sentimentTab.classList.add('active');
+                
+                const productTabContents = productProfileContainer.querySelectorAll('.tab-content');
+                productTabContents.forEach(content => content.classList.remove('active'));
+                const sentimentContent = getElement('product-sentiment-tab');
+                if (sentimentContent) sentimentContent.classList.add('active');
+                
+                // Set active news tab to YouTube by default
+                const productNewsTabs = productProfileContainer.querySelectorAll('.news-tab');
+                productNewsTabs.forEach(tab => tab.classList.remove('active'));
+                const youtubeTab = productProfileContainer.querySelector('.news-tab[data-news-tab="product-youtube"]');
+                if (youtubeTab) youtubeTab.classList.add('active');
+                
+                const productNewsContents = productProfileContainer.querySelectorAll('.news-content');
+                productNewsContents.forEach(content => content.classList.remove('active'));
+                const youtubeContent = getElement('product-youtube-content');
+                if (youtubeContent) youtubeContent.classList.add('active');
+            }
+            
+            // Scroll to top
+            window.scrollTo(0, 0);
+        }
+        
+        // Main initialization function
+        function initializeApp() {
+            // Initialize UI with products by sentiment view (default)
+            populateGrid('products', 'sentiment');
+            
+            // Get DOM elements
+            const searchButton = getElement('search-button');
+            const searchInput = getElement('search-input');
+            const searchSuggestions = getElement('search-suggestions');
+            const presetsDropdown = getElement('presets-dropdown');
+            const categoriesBtn = getElement('categories-btn');
+            const categoriesMenu = getElement('categories-menu');
+            const categoryItems = document.querySelectorAll('.category-item');
+            const logo = getElement('logo');
+            const backToHomeBtn = getElement('back-to-home');
+            const viewBtns = document.querySelectorAll('.view-btn');
+            
+            // Add event listeners for view toggle buttons
+            viewBtns.forEach(btn => {
+                addSafeEventListener(btn, 'click', function() {
+                    const viewType = this.getAttribute('data-view');
+                    const sortBy = this.getAttribute('data-sort');
+                    const categoryBtn = getElement('categories-btn');
+                    const category = categoryBtn ? categoryBtn.getAttribute('data-category') || 'all' : 'all';
+                    
+                    // Update view and sort by
+                    populateGrid(viewType, sortBy, category);
+                });
+            });
+            
+            // Logo click to go home
+            addSafeEventListener(logo, 'click', goHome);
+            
+            // Back to home button
+            addSafeEventListener(backToHomeBtn, 'click', goHome);
+            
+            // Search button click
+            addSafeEventListener(searchButton, 'click', handleSearch);
+            
+            // Search input keypress
+            addSafeEventListener(searchInput, 'keypress', function(e) {
+                if (e.key === 'Enter') {
+                    handleSearch();
+                }
+            });
+            
+            // Search input focus
+            addSafeEventListener(searchInput, 'focus', function() {
+                if (searchInput.value.trim().length > 0) {
+                    handleSearch();
+                }
+            });
+            
+            // Search input typing
+            addSafeEventListener(searchInput, 'input', function() {
+                if (searchInput.value.trim().length > 0) {
+                    handleSearch();
+                } else {
+                    searchSuggestions.style.display = 'none';
+                }
+            });
+            
+            // Click outside search suggestions to close
+            document.addEventListener('click', function(e) {
+                if (searchSuggestions && !searchSuggestions.contains(e.target) && e.target !== searchInput) {
+                    searchSuggestions.style.display = 'none';
+                }
+            });
+            
+            // Categories dropdown toggle
+            addSafeEventListener(categoriesBtn, 'click', function() {
+                categoriesMenu.classList.toggle('show');
+            });
+            
+            // Click outside categories menu to close
+            document.addEventListener('click', function(e) {
+                if (categoriesBtn && categoriesMenu && 
+                    !categoriesBtn.contains(e.target) && 
+                    !categoriesMenu.contains(e.target)) {
+                    categoriesMenu.classList.remove('show');
+                }
+            });
+            
+            // Category selection
+            categoryItems.forEach(item => {
+                addSafeEventListener(item, 'click', function() {
+                    const category = this.getAttribute('data-category');
+                    
+                    // Store category on the button for later use
+                    categoriesBtn.setAttribute('data-category', category);
+                    
+                    // Update active category
+                    document.querySelector('.category-item.active').classList.remove('active');
+                    this.classList.add('active');
+                    
+                    // Update button text with icon
+                    categoriesBtn.innerHTML = `${this.textContent} <svg class="categories-icon" xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>`;
+                    
+                    // Get current view type and sort from active view button
+                    const activeViewBtn = document.querySelector('.view-btn.active');
+                    const viewType = activeViewBtn ? activeViewBtn.getAttribute('data-view') : 'products';
+                    const sortBy = activeViewBtn ? activeViewBtn.getAttribute('data-sort') : 'sentiment';
+                    
+                    // Update grid with new category filter
+                    populateGrid(viewType, sortBy, category);
+                    
+                    // Close menu
+                    categoriesMenu.classList.remove('show');
+                });
+            });
+            
+            // Presets dropdown change
+            addSafeEventListener(presetsDropdown, 'change', function() {
+                const selectedPerson = presetsDropdown.value;
+                if (selectedPerson) {
+                    loadProfile(selectedPerson);
+                    presetsDropdown.value = ''; // Reset dropdown
+                }
+            });
+            
+            // Tab switching for person profile
+            document.querySelectorAll('.tab').forEach(tab => {
+                addSafeEventListener(tab, 'click', function() {
+                    const profileContainer = getElement('profile-container');
+                    if (!profileContainer || !profileContainer.contains(this)) return;
+                    
+                    const tabId = this.getAttribute('data-tab');
+                    
+                    // Update active tab
+                    profileContainer.querySelector('.tab.active').classList.remove('active');
+                    this.classList.add('active');
+                    
+                    // Update active content
+                    profileContainer.querySelector('.tab-content.active').classList.remove('active');
+                    document.getElementById(tabId + '-tab').classList.add('active');
+                });
+            });
+            
+            // Tab switching for product profile
+            const productProfileContainer = getElement('product-profile-container');
+            if (productProfileContainer) {
+                productProfileContainer.querySelectorAll('.tab').forEach(tab => {
+                    addSafeEventListener(tab, 'click', function() {
+                        const tabId = this.getAttribute('data-tab');
+                        
+                        // Update active tab
+                        productProfileContainer.querySelector('.tab.active').classList.remove('active');
+                        this.classList.add('active');
+                        
+                        // Update active content
+                        productProfileContainer.querySelector('.tab-content.active').classList.remove('active');
+                        document.getElementById(tabId + '-tab').classList.add('active');
+                    });
+                });
+            }
+            
+            // News tab switching for person profile
+            document.querySelectorAll('.news-tab').forEach(tab => {
+                addSafeEventListener(tab, 'click', function() {
+                    const profileContainer = getElement('profile-container');
+                    if (!profileContainer || !profileContainer.contains(this)) return;
+                    
+                    const tabId = this.getAttribute('data-news-tab');
+                    
+                    // Update active tab
+                    profileContainer.querySelector('.news-tab.active').classList.remove('active');
+                    this.classList.add('active');
+                    
+                    // Update active content
+                    profileContainer.querySelector('.news-content.active').classList.remove('active');
+                    document.getElementById(tabId + '-content').classList.add('active');
+                });
+            });
+            
+            // News tab switching for product profile
+            if (productProfileContainer) {
+                productProfileContainer.querySelectorAll('.news-tab').forEach(tab => {
+                    addSafeEventListener(tab, 'click', function() {
+                        const tabId = this.getAttribute('data-news-tab');
+                        
+                        // Update active tab
+                        productProfileContainer.querySelector('.news-tab.active').classList.remove('active');
+                        this.classList.add('active');
+                        
+                        // Update active content
+                        productProfileContainer.querySelector('.news-content.active').classList.remove('active');
+                        document.getElementById(tabId + '-content').classList.add('active');
+                    });
+                });
+            }
+            
+            // Notification buttons
+            const notificationBtn = getElement('notification-btn');
+            const productNotificationBtn = getElement('product-notification-btn');
+            const notificationModal = getElement('notification-modal');
+            const closeModal = getElement('close-modal');
+            const saveNotification = getElement('save-notification');
+            
+            addSafeEventListener(notificationBtn, 'click', function(e) {
+                e.stopPropagation(); // Prevent event bubbling
+                if (notificationModal) notificationModal.style.display = 'flex';
+            });
+            
+            addSafeEventListener(productNotificationBtn, 'click', function(e) {
+                e.stopPropagation(); // Prevent event bubbling
+                if (notificationModal) notificationModal.style.display = 'flex';
+            });
+            
+            // Close modal
+            addSafeEventListener(closeModal, 'click', function() {
+                if (notificationModal) notificationModal.style.display = 'none';
+            });
+            
+            // Close modal when clicking outside
+            window.addEventListener('click', function(e) {
+                if (notificationModal && e.target === notificationModal) {
+                    notificationModal.style.display = 'none';
+                }
+            });
+            
+            // Save notification settings
+            addSafeEventListener(saveNotification, 'click', function() {
+                if (notificationBtn) notificationBtn.classList.add('notification-active');
+                if (productNotificationBtn) productNotificationBtn.classList.add('notification-active');
+                if (notificationModal) notificationModal.style.display = 'none';
+                
+                // Show confirmation
+                alert('Notification settings saved successfully!');
+            });
+            
+            // Update threshold value displays
+            const sentimentThreshold = getElement('sentiment-threshold');
+            const sentimentThresholdValue = getElement('sentiment-threshold-value');
+            const relevancyThreshold = getElement('relevancy-threshold');
+            const relevancyThresholdValue = getElement('relevancy-threshold-value');
+            
+            addSafeEventListener(sentimentThreshold, 'input', function() {
+                if (sentimentThresholdValue) sentimentThresholdValue.textContent = sentimentThreshold.value + '%';
+            });
+            
+            addSafeEventListener(relevancyThreshold, 'input', function() {
+                if (relevancyThresholdValue) relevancyThresholdValue.textContent = relevancyThreshold.value + '%';
+            });
+            
+            // Google sign-in button
+            const googleSignin = getElement('google-signin');
+            const userProfile = getElement('user-profile');
+            const saveBtns = document.querySelectorAll('.save-btn');
+            
+            addSafeEventListener(googleSignin, 'click', function() {
+                // In a real app, this would authenticate with Google
+                alert('Google authentication would happen here.');
+                
+                // Show profile avatar and hide sign-in button
+                if (userProfile) userProfile.style.display = 'block';
+                if (googleSignin) googleSignin.style.display = 'none';
+                
+                // Update UI for logged in state
+                saveBtns.forEach(btn => {
+                    btn.style.display = 'flex';
+                });
+            });
+            
+            // Profile avatar click
+            const profileAvatar = getElement('profile-avatar');
+            const profileMenu = getElement('profile-menu');
+            
+            addSafeEventListener(profileAvatar, 'click', function() {
+                if (profileMenu) profileMenu.classList.toggle('show');
+            });
+            
+            // Close profile menu when clicking outside
+            document.addEventListener('click', function(e) {
+                if (profileMenu && profileAvatar && 
+                    !profileMenu.contains(e.target) && 
+                    e.target !== profileAvatar) {
+                    profileMenu.classList.remove('show');
+                }
+            });
+            
+            // Profile menu items
+            const savedItem = getElement('saved-item');
+            const accountSettingsItem = getElement('account-settings-item');
+            const notificationSettingsItem = getElement('notification-settings-item');
+            const proItem = getElement('pro-item');
+            const signOutItem = getElement('sign-out-item');
+            const savedModal = getElement('saved-modal');
+            const accountModal = getElement('account-modal');
+            const notificationPrefsModal = getElement('notification-prefs-modal');
+            const proModal = getElement('pro-modal');
+            
+            addSafeEventListener(savedItem, 'click', function() {
+                if (savedModal) savedModal.style.display = 'flex';
+                if (profileMenu) profileMenu.classList.remove('show');
+            });
+            
+            addSafeEventListener(accountSettingsItem, 'click', function() {
+                if (accountModal) accountModal.style.display = 'flex';
+                if (profileMenu) profileMenu.classList.remove('show');
+            });
+            
+            addSafeEventListener(notificationSettingsItem, 'click', function() {
+                if (notificationPrefsModal) notificationPrefsModal.style.display = 'flex';
+                if (profileMenu) profileMenu.classList.remove('show');
+            });
+            
+            addSafeEventListener(proItem, 'click', function() {
+                if (proModal) proModal.style.display = 'flex';
+                if (profileMenu) profileMenu.classList.remove('show');
+            });
+            
+            addSafeEventListener(signOutItem, 'click', function() {
+                // In a real app, this would sign out the user
+                alert('User would be signed out here.');
+                
+                // Show sign-in button and hide profile avatar
+                if (userProfile) userProfile.style.display = 'none';
+                if (googleSignin) googleSignin.style.display = 'flex';
+                if (profileMenu) profileMenu.classList.remove('show');
+                
+                // Update UI for logged out state
+                saveBtns.forEach(btn => {
+                    btn.style.display = 'none';
+                });
+            });
+            
+            // Close all modals
+            document.querySelectorAll('.close-modal').forEach(closeBtn => {
+                addSafeEventListener(closeBtn, 'click', function() {
+                    document.querySelectorAll('.modal').forEach(modal => {
+                        modal.style.display = 'none';
+                    });
+                });
+            });
+            
+            // Close modals when clicking outside
+            window.addEventListener('click', function(e) {
+                document.querySelectorAll('.modal').forEach(modal => {
+                    if (e.target === modal) {
+                        modal.style.display = 'none';
+                    }
+                });
+            });
+            
+            // Saved items tabs
+            document.querySelectorAll('[data-saved-tab]').forEach(tab => {
+                addSafeEventListener(tab, 'click', function() {
+                    const savedTab = this.getAttribute('data-saved-tab');
+                    
+                    // Update active tab
+                    document.querySelector('[data-saved-tab].active').classList.remove('active');
+                    this.classList.add('active');
+                    
+                    // Update active content
+                    document.querySelectorAll('#saved-modal .tab-content').forEach(content => {
+                        content.classList.remove('active');
+                    });
+                    document.getElementById(`saved-${savedTab}-tab`).classList.add('active');
+                });
+            });
+            
+            // Save buttons
+            const saveBtn = getElement('save-btn');
+            const productSaveBtn = getElement('product-save-btn');
+            
+            addSafeEventListener(saveBtn, 'click', function(e) {
+                e.stopPropagation(); // Prevent event bubbling
+                this.classList.toggle('save-active');
+                
+                if (this.classList.contains('save-active')) {
+                    alert('Profile saved to your saved items!');
+                } else {
+                    alert('Profile removed from your saved items.');
+                }
+            });
+            
+            addSafeEventListener(productSaveBtn, 'click', function(e) {
+                e.stopPropagation(); // Prevent event bubbling
+                this.classList.toggle('save-active');
+                
+                if (this.classList.contains('save-active')) {
+                    alert('Product saved to your saved items!');
+                } else {
+                    alert('Product removed from your saved items.');
+                }
+            });
+        }
+        
+        // Run initialization when DOM is fully loaded
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initializeApp);
+        } else {
+            initializeApp();
+        }
+    </script>
+</body>
+</html>
