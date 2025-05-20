@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ProductName Sentiment Dashboard</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+            display: flex;
+            background-color: #f5f0e5;
+        }
+        
+        .sidebar {
+            width: 200px;
+            background-color: #1c1c1c;
+            color: white;
+            min-height: 100vh;
+            padding-top: 20px;
+        }
+        
+        .sidebar-title {
+            font-size: 24px;
+            padding: 20px;
+            margin-bottom: 0;
+        }
+        
+        .search-container {
+            padding: 10px 20px 20px 20px;
+            margin-bottom: 10px;
+        }
+        
+        .sidebar-search {
+            width: 100%;
+            padding: 8px 12px;
+            border-radius: 5px;
+            border: none;
+            background-color: #323232;
+            color: white;
+            font-size: 14px;
+            box-sizing: border-box;
+        }
+        
+        .sidebar-search::placeholder {
+            color: #aaa;
+        }
+        
+        .sidebar-item {
+            padding: 15px 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: white;
+            text-decoration: none;
+            transition: background-color 0.2s ease;
+        }
+        
+        .sidebar-item:hover {
+            background-color: #2a2a2a;
+        }
+        
+        .sidebar-item.active {
+            background-color: #323232;
+        }
+        
+        .sidebar-item-icon {
+            width: 20px;
+            height: 20px;
+            background-color: #ccc;
+            border-radius: 50%;
+        }
+        
+        .main-content {
+            flex: 1;
+            background-color: #f5f0e5;
+            padding: 20px;
+            box-sizing: border-box;
+            overflow-x: auto;
+        }
+        
+        /* Product details and Video section */
+        .top-section {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .product-details {
+            flex: 1;
+            background-color: white;
+            border-radius: 5px;
+            padding-top: 135px;
+        }
+        
+        .product-name {
+            font-size: 32px;
+            text-align: center;
+            padding: 35px 0 120px;
+            margin: 0;
+        }
+        
+        .details-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 20px 15px;
+            border-bottom: 1px solid #eee;
+            font-size: 18px;
+        }
+        
+        .price-button {
+            background-color: #4b3c2a;
+            color: white;
+            border: none;
+            padding: 10px 18px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 18px;
+        }
+        
+        .video-container {
+            width: 700px;
+            height: 700px;
+            background-color: #1c1c1c;
+            border-radius: 5px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            flex-shrink: 0;
+        }
+        
+        .video-message {
+            font-size: 24px;
+            margin-bottom: 15px;
+        }
+        
+        .video-link {
+            color: #ccc;
+            text-decoration: underline;
+            font-size: 18px;
+        }
+        
+        /* Graph and Reviews section */
+        .middle-section {
+            display: flex;
+            gap: 20px;
+            margin-top: 20px;
+        }
+        
+        /* Common style for both boxes to ensure same height */
+        .box {
+            background-color: white;
+            border-radius: 5px;
+            height: 500px;
+        }
+        
+        .graph-box {
+            flex: 2;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .tabs {
+            display: flex;
+            padding: 15px 20px;
+            background-color: #f2efe7;
+            border-bottom: 1px solid #e5e0d5;
+        }
+        
+        .tab-button {
+            padding: 10px 20px;
+            margin-right: 15px;
+            border: none;
+            font-weight: bold;
+            cursor: pointer;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            font-size: 16px;
+        }
+        
+        .tab-indicator {
+            margin-left: 12px;
+            font-weight: bold;
+            font-size: 16px;
+        }
+        
+        .active-tab {
+            background-color: #1c1c1c;
+            color: white;
+        }
+        
+        .inactive-tab {
+            background-color: transparent;
+            color: #666;
+        }
+        
+        .graph-container {
+            flex-grow: 1;
+            overflow: hidden;
+        }
+        
+        .graph {
+            width: 100%;
+            height: 100%;
+        }
+        
+        .graph.hidden {
+            display: none;
+        }
+        
+        .reviews-box {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+        }
+        
+        .review {
+            margin-bottom: 15px;
+        }
+        
+        .review:last-child {
+            margin-bottom: 0;
+        }
+        
+        .review-author {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 5px;
+        }
+        
+        .avatar {
+            width: 40px;
+            height: 40px;
+            background-color: #ccc;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            flex-shrink: 0;
+        }
+        
+        .author-name {
+            font-weight: bold;
+            flex-grow: 1;
+        }
+        
+        .platform-icon {
+            font-size: 18px;
+            margin-left: auto;
+        }
+        
+        .comment-bubble {
+            background-color: #f2f2f7;
+            border-radius: 18px;
+            padding: 10px 15px;
+            font-size: 14px;
+            line-height: 1.4;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+        
+        .comment-bubble:hover {
+            background-color: #e9e9eb;
+        }
+        
+        @media (max-width: 1200px) {
+            .middle-section {
+                flex-direction: column;
+            }
+            
+            .top-section {
+                flex-direction: column;
+            }
+            
+            .video-container {
+                width: 100%;
+                height: 500px;
+            }
+            
+            .box {
+                height: auto;
+                min-height: 400px;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            body {
+                flex-direction: column;
+            }
+            
+            .sidebar {
+                width: 100%;
+                min-height: auto;
+            }
+            
+            .video-container {
+                height: 350px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="sidebar">
+        <div class="sidebar-title">goodsline</div>
+        <div class="search-container">
+            <input type="text" class="sidebar-search" placeholder="Search...">
+        </div>
+        <a href="#" class="sidebar-item active">
+            <div class="sidebar-item-icon"></div>
+            Dashboard
+        </a>
+        <a href="#" class="sidebar-item">
+            <div class="sidebar-item-icon"></div>
+            Popular
+        </a>
+        <a href="#" class="sidebar-item">
+            <div class="sidebar-item-icon"></div>
+            Rated
+        </a>
+        <a href="#" class="sidebar-item">
+            <div class="sidebar-item-icon"></div>
+            Categories
+        </a>
+        <a href="#" class="sidebar-item">
+            <div class="sidebar-item-icon"></div>
+            Sonar
+        </a>
+        <a href="#" class="sidebar-item">
+            <div class="sidebar-item-icon"></div>
+            Settings
+        </a>
+        <a href="#" class="sidebar-item">
+            <div class="sidebar-item-icon"></div>
+            Saved
+        </a>
+    </div>
+    
+    <div class="main-content">
+        <div class="top-section">
+            <div class="video-container">
+                <div class="video-message">Video unavailable</div>
+                <a href="#" class="video-link">Watch on YouTube</a>
+            </div>
+            
+            <div class="product-details">
+                <h1 class="product-name">ProductName</h1>
+                <div class="details-row">
+                    <div>Brand</div>
+                    <div>TechBrand</div>
+                </div>
+                <div class="details-row">
+                    <div>Category</div>
+                    <div>Electronics</div>
+                </div>
+                <div class="details-row">
+                    <div>Release date</div>
+                    <div>March 15, 2025 (2 months old)</div>
+                </div>
+                <div class="details-row">
+                    <div>Retail price</div>
+                    <div>
+                        <button class="price-button">$499.99</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="middle-section">
+            <!-- Graph Box -->
+            <div class="box graph-box" style="height: 610px;">
+                <div class="tabs">
+                    <button class="tab-button" id="sentiment-tab">Sentiment <span class="tab-indicator">+78%</span></button>
+                    <button class="tab-button" id="relevancy-tab">Relevancy <span class="tab-indicator">2,314</span></button>
+                </div>
+                
+                <div class="graph-container">
+                    <!-- Sentiment Graph -->
+                    <svg id="sentiment-graph" class="graph" width="100%" height="100%" viewBox="0 0 680 420" preserveAspectRatio="xMidYMid meet">
+                        <!-- Background -->
+                        <rect x="0" y="0" width="680" height="420" fill="white" />
+                        
+                        <!-- Horizontal grid lines -->
+                        <line x1="60" y1="360" x2="650" y2="360" stroke="#eee" stroke-width="1" />
+                        <line x1="60" y1="290" x2="650" y2="290" stroke="#eee" stroke-width="1" />
+                        <line x1="60" y1="220" x2="650" y2="220" stroke="#eee" stroke-width="1" />
+                        <line x1="60" y1="150" x2="650" y2="150" stroke="#eee" stroke-width="1" />
+                        <line x1="60" y1="80" x2="650" y2="80" stroke="#eee" stroke-width="1" />
+                        
+                        <!-- Y-axis -->
+                        <line x1="60" y1="40" x2="60" y2="360" stroke="#ccc" stroke-width="1" />
+                        <!-- X-axis -->
+                        <line x1="60" y1="360" x2="650" y2="360" stroke="#ccc" stroke-width="1" />
+                        
+                        <!-- Y-axis labels -->
+                        <text x="50" y="50" text-anchor="end" font-size="12" fill="#666">100%</text>
+                        <text x="50" y="120" text-anchor="end" font-size="12" fill="#666">75%</text>
+                        <text x="50" y="190" text-anchor="end" font-size="12" fill="#666">50%</text>
+                        <text x="50" y="260" text-anchor="end" font-size="12" fill="#666">25%</text>
+                        <text x="50" y="370" text-anchor="end" font-size="12" fill="#666">0%</text>
+                        
+                        <!-- X-axis labels (years) -->
+                        <text x="118" y="380" text-anchor="middle" font-size="12" fill="#666">2021</text>
+                        <text x="236" y="380" text-anchor="middle" font-size="12" fill="#666">2022</text>
+                        <text x="354" y="380" text-anchor="middle" font-size="12" fill="#666">2023</text>
+                        <text x="472" y="380" text-anchor="middle" font-size="12" fill="#666">2024</text>
+                        <text x="590" y="380" text-anchor="middle" font-size="12" fill="#666">2025</text>
+                        
+                        <!-- Line chart data -->
+                        <polyline 
+                            points="118,260 236,190 354,120 472,80 590,50" 
+                            fill="none" 
+                            stroke="#4b3c2a" 
+                            stroke-width="3" 
+                        />
+                        
+                        <!-- Data points -->
+                        <circle cx="118" cy="260" r="6" fill="#4b3c2a" />
+                        <circle cx="236" cy="190" r="6" fill="#4b3c2a" />
+                        <circle cx="354" cy="120" r="6" fill="#4b3c2a" />
+                        <circle cx="472" cy="80" r="6" fill="#4b3c2a" />
+                        <circle cx="590" cy="50" r="6" fill="#4b3c2a" />
+                    </svg>
+                    
+                    <!-- Relevancy Graph -->
+                    <svg id="relevancy-graph" class="graph hidden" width="100%" height="100%" viewBox="0 0 680 420" preserveAspectRatio="xMidYMid meet">
+                        <!-- Background -->
+                        <rect x="0" y="0" width="680" height="420" fill="white" />
+                        
+                        <!-- Horizontal grid lines -->
+                        <line x1="60" y1="360" x2="650" y2="360" stroke="#eee" stroke-width="1" />
+                        <line x1="60" y1="290" x2="650" y2="290" stroke="#eee" stroke-width="1" />
+                        <line x1="60" y1="220" x2="650" y2="220" stroke="#eee" stroke-width="1" />
+                        <line x1="60" y1="150" x2="650" y2="150" stroke="#eee" stroke-width="1" />
+                        <line x1="60" y1="80" x2="650" y2="80" stroke="#eee" stroke-width="1" />
+                        
+                        <!-- Y-axis -->
+                        <line x1="60" y1="40" x2="60" y2="360" stroke="#ccc" stroke-width="1" />
+                        <!-- X-axis -->
+                        <line x1="60" y1="360" x2="650" y2="360" stroke="#ccc" stroke-width="1" />
+                        
+                        <!-- Y-axis labels (different for relevancy) -->
+                        <text x="50" y="50" text-anchor="end" font-size="12" fill="#666">3,000</text>
+                        <text x="50" y="120" text-anchor="end" font-size="12" fill="#666">2,250</text>
+                        <text x="50" y="190" text-anchor="end" font-size="12" fill="#666">1,500</text>
+                        <text x="50" y="260" text-anchor="end" font-size="12" fill="#666">750</text>
+                        <text x="50" y="370" text-anchor="end" font-size="12" fill="#666">0</text>
+                        
+                        <!-- X-axis labels (days) -->
+                        <text x="118" y="380" text-anchor="middle" font-size="12" fill="#666">May 14</text>
+                        <text x="207" y="380" text-anchor="middle" font-size="12" fill="#666">May 15</text>
+                        <text x="296" y="380" text-anchor="middle" font-size="12" fill="#666">May 16</text>
+                        <text x="385" y="380" text-anchor="middle" font-size="12" fill="#666">May 17</text>
+                        <text x="474" y="380" text-anchor="middle" font-size="12" fill="#666">May 18</text>
+                        <text x="563" y="380" text-anchor="middle" font-size="12" fill="#666">May 19</text>
+                        <text x="652" y="380" text-anchor="middle" font-size="12" fill="#666">May 20</text>
+                        
+                        <!-- Line chart data for relevancy -->
+                        <polyline 
+                            points="118,260 207,230 296,170 385,120 474,90 563,70 652,60" 
+                            fill="none" 
+                            stroke="#4b3c2a" 
+                            stroke-width="3" 
+                        />
+                        
+                        <!-- Data points -->
+                        <circle cx="118" cy="260" r="6" fill="#4b3c2a" />
+                        <circle cx="207" cy="230" r="6" fill="#4b3c2a" />
+                        <circle cx="296" cy="170" r="6" fill="#4b3c2a" />
+                        <circle cx="385" cy="120" r="6" fill="#4b3c2a" />
+                        <circle cx="474" cy="90" r="6" fill="#4b3c2a" />
+                        <circle cx="563" cy="70" r="6" fill="#4b3c2a" />
+                        <circle cx="652" cy="60" r="6" fill="#4b3c2a" />
+                    </svg>
+                    </svg>
+                </div>
+            </div>
+            
+            <!-- Reviews Box -->
+            <div class="box reviews-box" style="margin-top: 70px;">
+                <h2 style="margin-top: 0;">Recent</h2>
+                
+                <div class="review">
+                    <div class="review-author">
+                        <div class="avatar">ER</div>
+                        <div class="author-name">Emma R.</div>
+                        <span class="platform-icon">📱</span>
+                    </div>
+                    <a href="#" style="text-decoration: none; color: inherit;">
+                        <div class="comment-bubble">Great battery life but a bit expensive.</div>
+                    </a>
+                </div>
+                
+                <div class="review">
+                    <div class="review-author">
+                        <div class="avatar">SB</div>
+                        <div class="author-name">Savory Bites Bistro</div>
+                        <span class="platform-icon">▶️</span>
+                    </div>
+                    <a href="#" style="text-decoration: none; color: inherit;">
+                        <div class="comment-bubble">Good value for the money.</div>
+                    </a>
+                </div>
+                
+                <div class="review">
+                    <div class="review-author">
+                        <div class="avatar">DC</div>
+                        <div class="author-name">Daniel C.</div>
+                        <span class="platform-icon">🎵</span>
+                    </div>
+                    <a href="#" style="text-decoration: none; color: inherit;">
+                        <div class="comment-bubble">Design feels cheap. Expected better.</div>
+                    </a>
+                </div>
+                
+                <div class="review">
+                    <div class="review-author">
+                        <div class="avatar">JT</div>
+                        <div class="author-name">James T.</div>
+                        <span class="platform-icon">🐦</span>
+                    </div>
+                    <a href="#" style="text-decoration: none; color: inherit;">
+                        <div class="comment-bubble">Battery lasts all day. Impressed with the performance.</div>
+                    </a>
+                </div>
+                
+                <div class="review">
+                    <div class="review-author">
+                        <div class="avatar">KL</div>
+                        <div class="author-name">Kate L.</div>
+                        <span class="platform-icon">📱</span>
+                    </div>
+                    <a href="#" style="text-decoration: none; color: inherit;">
+                        <div class="comment-bubble">Interface could be more intuitive.</div>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Get the tab buttons and graphs
+        const sentimentTab = document.getElementById('sentiment-tab');
+        const relevancyTab = document.getElementById('relevancy-tab');
+        const sentimentGraph = document.getElementById('sentiment-graph');
+        const relevancyGraph = document.getElementById('relevancy-graph');
+        
+        // Set initial active state
+        sentimentTab.classList.add('active-tab');
+        relevancyTab.classList.add('inactive-tab');
+        
+        // Add click event listeners to the tabs
+        sentimentTab.addEventListener('click', function() {
+            // Update tab styling
+            sentimentTab.classList.add('active-tab');
+            sentimentTab.classList.remove('inactive-tab');
+            relevancyTab.classList.add('inactive-tab');
+            relevancyTab.classList.remove('active-tab');
+            
+            // Show sentiment graph, hide relevancy graph
+            sentimentGraph.classList.remove('hidden');
+            relevancyGraph.classList.add('hidden');
+        });
+        
+        relevancyTab.addEventListener('click', function() {
+            // Update tab styling
+            relevancyTab.classList.add('active-tab');
+            relevancyTab.classList.remove('inactive-tab');
+            sentimentTab.classList.add('inactive-tab');
+            sentimentTab.classList.remove('active-tab');
+            
+            // Show relevancy graph, hide sentiment graph
+            relevancyGraph.classList.remove('hidden');
+            sentimentGraph.classList.add('hidden');
+        });
+    </script>
+</body>
+</html>
