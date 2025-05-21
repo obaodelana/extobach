@@ -35,10 +35,9 @@ class Product:
         }
 
         # Instructions
-        - If the product's name is too vague (e.g., "shirt", "big bag", "love"), then respond with "Could you be more specific?".
-        - If the product's name is incomprehensible (e.g., "nn", "argh"), then respond with "Product not found".
-        - If the product does not exist, then respond with "Product not found".
-        - If the product's name is ambiguous (e.g., "Lululemon shirt" or "Makeup from Mac"), then respond with a list of 3-5 possible product names (one per line.)
+        - If the product's name is too vague (e.g., "shirt", "big bag", "love", "Makeup from Mac", "Lululemon shirt"), then respond with "Could you be more specific?".
+        - If the product's name is incomprehensible (e.g., "nn", "argh"), then respond with "None".
+        - If the product does not exist, then respond with "None".
         - Keep the product description concise and summarized
         - Return the product's price in Canadian dollars. If the price is not available in Canadian dollars, return it in US dollars. 
         - Keep the output very concise, avoid explaining your answers.
@@ -56,9 +55,10 @@ class Product:
                 },
                 {
                     "role": "user",
-                    "content": f"Get me the latest product information on '{self.name}'"
+                    "content": f"Get me the latest product information on '{self.name}'."
                 }
             ],
+            "temperature": 0.1,
             "max_tokens": 500,
             "return_images": True,
             "response_format": {
@@ -84,14 +84,14 @@ class Product:
 
         res_json: dict = response.json()
 
-        image_url = None
-        if "images" in res_json and len(res_json["images"]) > 0:
-            image_url = res_json["images"][0].get("image_url")
+        image_urls = []
+        for image in res_json.get("images", []):
+            image_urls.append(image["image_url"])
         output = res_json["choices"][0]["message"]["content"]
 
         try:
             details = ProductDetails.model_validate_json(output)
-            details.image_url = image_url
+            details.images = image_urls
 
             return details
         except ValidationError as e:

@@ -16,7 +16,7 @@ class ProductDetails(BaseModel):
     name: str
     description: str
     price: dict[str, float] | float
-    image_url: str | None = None
+    images: list[str] = []
     currency: CurrencyEnum = CurrencyEnum.cad
     brand: str
     category: str
