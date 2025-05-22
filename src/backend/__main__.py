@@ -5,7 +5,7 @@ query = input("Search for some product: ")
 product_suggestions = ProductSuggestions(query)
 
 product_names = product_suggestions.names
-print(repr(product_names))
+print(*product_names.names, sep="\n")
 
 # product_name = input("What product will you like to see? ")
 # product = Product(product_name)
