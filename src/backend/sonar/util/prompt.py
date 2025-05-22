@@ -8,6 +8,7 @@ import requests
 def prompt(func=None, *,
            max_tokens=500,
            temperature=0.1,
+           return_images=False,
            json_schema: dict[str, Any] | None = None):
     """
     Transforms a function that returns a string into
@@ -34,6 +35,7 @@ def prompt(func=None, *,
         return partial(prompt,
                        max_tokens=max_tokens,
                        temperature=temperature,
+                       return_images=return_images,
                        json_schema=json_schema)
 
     @wraps(func)
@@ -53,7 +55,7 @@ def prompt(func=None, *,
             ],
             "temperature": temperature,
             "max_tokens": max_tokens,
-            "return_images": True,
+            "return_images": return_images,
             "response_format": ({
                 "type": "json_schema",
                 "json_schema": {"schema": json_schema}

@@ -10,7 +10,7 @@ class Product:
 
         self.name = product_name
 
-    @prompt(json_schema=ProductDetails.model_json_schema())
+    @prompt(json_schema=ProductDetails.model_json_schema(), return_images=True)
     def _get_details(self) -> str:
         """
         # Identity
