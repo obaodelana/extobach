@@ -1,3 +1,5 @@
+from pydantic import ValidationError
+
 from .util.prompt import prompt
 from .models.product_names import ProductNames
 
@@ -22,18 +24,29 @@ class ProductSuggestions:
         # Output format
         {
             "names": [
-                "Product Name 1",
-                "Product Name 2",
-                "Product Name 3",
+                "Product 1",
+                "Product 2",
+                "Product 3",
                 ...
             ]
         }
 
         # Instructions
         - When given a search query, return the 3-10 most popular products related to the query.
-        - Only return product names. Do not return any other information about the product.
-        - Include the brand name when giving the product name. 
-        - Respond in JSON format
+        - Only return product names prepended with their brands. Do not return any other information about the product.
+        - Don't just return brand names. Return a real product with its brand e.g., "'Brand' 'Product Name'".
+        - Respond in JSON format.
         """
 
         return f"Give me the top 3-10 product names most related to '{self.query}'"
+
+    @property
+    def names(self) -> ProductNames:
+        response = self._get_suggestions()
+
+        output = response["choices"][0]["message"]["content"]  # type: ignore
+        try:
+            suggestions = ProductNames.model_validate_json(output)
+            return suggestions
+        except ValidationError:
+            raise Exception(f"Cannot parse: '{output}'")

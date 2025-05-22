@@ -60,4 +60,4 @@ class Product:
 
             return details
         except ValidationError as e:
-            raise Exception(output)
+            raise Exception(f"Cannot parse: '{output}'")
