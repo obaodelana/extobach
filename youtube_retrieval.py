@@ -4,6 +4,8 @@ from flask import Flask, request, jsonify
 from dotenv import load_dotenv
 import os
 from googleapiclient.discovery import build
+import datetime
+import random
 
 load_dotenv()
 api_key = os.getenv('YOUTUBE_API_KEY', None)
@@ -28,57 +30,84 @@ def get_youtube_data():
         return jsonify({'error': 'productName is required'}), 400
     
     try:
-        search_response = youtube.search().list(
-            q = product_name,
-            part = 'id,snippet',
-            type = 'video',
-            maxResults = 1 #Can increase if needed
-        ).execute()
 
-        if not search_response['items']:
-            return jsonify({'error': 'No video found for this product.'}), 404
-    
+        current_year = datetime.datetime.now().year
+        all_videos = []
 
-        video_id = search_response['items'][0]['id']['videoId']
-        video_title = search_response['items'][0]['snippet']['title']
+        for year in range(current_year - 5 + 1, current_year + 1):
+            start_date = f"{year}-01-01T00:00:00Z"
+            end_date = f"{year}-12-31T23:59:59Z"
 
-        #Retrieve statistics (views, likes, comments included)
-        video_response = youtube.videos().list(
-            part='statistics',
-            id=video_id
-        ).execute()
+            search_response = youtube.search().list(
+                q=product_name,
+                part='id,snippet',
+                type='video',
+                publishedAfter=start_date,
+                publishedBefore=end_date,
+                maxResults=50  # Increase pool for randomness
+            ).execute()
 
-        stats = video_response['items'][0]['statistics']
+            items = search_response.get('items', [])
+            if not items:
+                continue
 
-        #Retrieve comments
-        comments_response = youtube.commentThreads().list(
-            part='snippet',
-            videoId=video_id,
-            maxResults=20,
-            textFormat='plainText'
-        ).execute()
+            sampled_videos = random.sample(items, min(10, len(items)))
 
-        comments = [
-            {
-                'author': item['snippet']['topLevelComment']['snippet']['authorDisplayName'],
-                'text': item['snippet']['topLevelComment']['snippet']['textDisplay'],
-                'publishedAt': item['snippet']['topLevelComment']['snippet']['publishedAt']
-            }
-            for item in comments_response.get('items', [])
-        ]
+            for item in sampled_videos:
+                video_id = item['id']['videoId']
+                video_title = item['snippet']['title']
+                video_published = item['snippet']['publishedAt']
 
-        #Return structured JSON
-        return jsonify({
-            'videoId': video_id,
-            'title': video_title,
-            'statistics': {
-                'views': stats.get('viewCount', 'N/A'),
-                'likes': stats.get('likeCount', 'N/A'),
-                'comments': stats.get('commentCount', 'N/A')
-            },
-            'topComments': comments
-        })
+                # Retrieve statistics
+                video_response = youtube.videos().list(
+                    part='statistics',
+                    id=video_id
+                ).execute()
 
+                stats = video_response['items'][0]['statistics']
+
+                # Retrieve up to 100 comments
+                comment_threads = []
+                next_page_token = None
+                comments_year_limit = f"{year}-12-31T23:59:59Z"
+
+                while len(comment_threads) < 100:
+                    comment_response = youtube.commentThreads().list(
+                        part='snippet',
+                        videoId=video_id,
+                        maxResults=min(100 - len(comment_threads), 50),
+                        pageToken=next_page_token,
+                        textFormat='plainText',
+                        order='time'
+                    ).execute()
+
+                    for item in comment_response.get('items', []):
+                        comment = item['snippet']['topLevelComment']['snippet']
+                        comment_date = comment['publishedAt']
+                        if comment_date <= comments_year_limit:
+                            comment_threads.append({
+                                'author': comment['authorDisplayName'],
+                                'text': comment['textDisplay'],
+                                'publishedAt': comment_date
+                            })
+
+                    next_page_token = comment_response.get('nextPageToken')
+                    if not next_page_token:
+                        break
+
+                all_videos.append({
+                    'videoId': video_id,
+                    'title': video_title,
+                    'publishedAt': video_published,
+                    'statistics': {
+                        'views': stats.get('viewCount', 'N/A'),
+                        'likes': stats.get('likeCount', 'N/A'),
+                        'comments': stats.get('commentCount', 'N/A')
+                    },
+                    'topComments': comment_threads
+                })
+
+        return jsonify({'videos': all_videos})
 
     except Exception as e:
         return jsonify({'error': str(e)}), 500
