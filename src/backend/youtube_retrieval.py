@@ -14,21 +14,21 @@ assert api_key is not None, "API key not found. Please set the YOUTUBE_API_KEY e
 youtube = build(
     'youtube',
     'v3',
-    developerKey = api_key
+    developerKey=api_key
 )
 
-#Initialize Flask app
+# Initialize Flask app
 app = Flask(__name__)
 
-@app.route('/api/youtube', methods=['POST'])
 
+@app.route('/api/youtube', methods=['POST'])
 def get_youtube_data():
-    data = request.get_json
+    data = request.get_json()
     product_name = data.get('productName')
 
     if not product_name:
         return jsonify({'error': 'productName is required'}), 400
-    
+
     try:
 
         current_year = datetime.datetime.now().year
@@ -112,11 +112,6 @@ def get_youtube_data():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
+
 if __name__ == '__main__':
-    app.run(debug = True)
-
-
-
-
-
-
+    app.run(debug=True)
