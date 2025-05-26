@@ -13,9 +13,9 @@ def get_youtube_data():
     release_date = data.get('releaseDate')
 
     if not product_name:
-        return {'error': 'productName is required'}, 400
+        return {'error': '"productName" is required'}, 400
     elif not release_date:
-        return {'error': 'releaseDate is required'}, 400
+        return {'error': '"releaseDate" is required'}, 400
 
     try:
         yt_retriever = YTRetriever(product_name, int(release_date))

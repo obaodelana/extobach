@@ -56,7 +56,7 @@ class Product:
         output = response["choices"][0]["message"]["content"]  # type: ignore
 
         try:
-            details = ProductDetails.model_validate_json(output)
+            details = ProductDetails.model_validate_json(output, strict=False)
             details.images = image_urls
 
             return details
