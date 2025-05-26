@@ -41,12 +41,12 @@ class ProductSuggestions:
         return f"Give me the top 3-10 product names most related to '{self.query}'"
 
     @property
-    def names(self) -> ProductNames:
+    def names(self) -> list[str]:
         response = self._get_suggestions()
 
         output = response["choices"][0]["message"]["content"]  # type: ignore
         try:
-            suggestions = ProductNames.model_validate_json(output)
+            suggestions = ProductNames.model_validate_json(output).names
             return suggestions
         except ValidationError:
             raise Exception(f"Cannot parse: '{output}'")

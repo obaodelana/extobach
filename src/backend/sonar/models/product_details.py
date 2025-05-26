@@ -15,6 +15,7 @@ class CurrencyEnum(StrEnum):
 class ProductDetails(BaseModel):
     name: str
     description: str
+    releaseDate: int
     price: dict[str, float]
     images: list[str] = []
     currency: CurrencyEnum = CurrencyEnum.cad

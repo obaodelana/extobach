@@ -22,6 +22,7 @@ class Product:
         {
             "name": The product's full name
             "description": The product's description
+            "releaseDate:" The year the product was released into market
             "price": {
                 "low": Minimum price
                 "high": Maximum price
