@@ -1,6 +1,6 @@
 # 📊 Goodsline
 
-**Transform digital chaos into crystal-clear insights** 🚀
+**Transform digital chaos into crystal-clear products insights** 🚀
 
 [![MIT License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 [![Hackathon Winner](https://img.shields.io/badge/Perplexixity-Hackathon-blue.svg)](#)
@@ -30,20 +30,21 @@ Powered by Perplexity Sonar, we aggregate real-time and historical data from You
 
 #### 🔥 **Relevancy Score**
 Captures short-term product buzz through:
-- 👀 View counts
-- 💬 Comment engagement
-- 👍 Likes & reactions
-- 🎬 New content creation
+- 👀 View counts (+1)
+- 💬 Comment engagement (+3)
+- 👍 Likes & reactions (+1)
+- 👎 Dislike (-1)
+- 🎬 New content creation (+5)
 
 *7-day rolling window for immediate trend detection*
 
 #### 💭 **Sentiment Analysis**
 Long-range emotional intelligence spanning 5 years:
-- 😡 Very Negative (-2)
-- 😞 Negative (-1)
+- 😡 Very Negative (-5)
+- 😞 Negative (-4)
 - 😐 Neutral (0)
-- 😊 Positive (+1)
-- 🤩 Very Positive (+2)
+- 😊 Positive (+3)
+- 🤩 Very Positive (+5)
 
 ### 📈 **Dynamic Visualizations**
 Interactive dashboards and sleek graphs that bring data to life, making trend identification effortless.
