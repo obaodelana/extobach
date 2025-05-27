@@ -1,4 +1,4 @@
-# 📊 Goodsline
+# 📈 Goodsline 📉
 
 **Transform digital chaos into crystal-clear product insights** 🚀
 
