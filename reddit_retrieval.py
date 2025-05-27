@@ -48,17 +48,19 @@ def get_reddit_data():
 
             submissions = list(reddit.subreddit('all').search(
                 query = query,
-                sort = 'new',
+                #Sort by relevance not by 'new' (New pulls most recent posts which come from 2025)
+                sort = 'relevance',
                 syntax = 'lucene',
                 time_filter = 'all',
-                limit = 50
+                #Larger pool of posts to sample from to potentially include older posts
+                limit = 500
             ))
 
             #Filter submissions that were published within the year (PRAW doesn't support date range filtering directly :C)
-            submissions = [s for s in submissions if start_epoch <= s.created_utc <= end_epoch]
+            filtered_submissions = [s for s in submissions if start_epoch <= s.created_utc <= end_epoch]
 
             #Select exactly 10 random submissions given there are more than 10 submissions. If not, select all submissions.
-            sampled_submissions = random.sample(submissions, min(10, len(submissions)))
+            sampled_submissions = random.sample(filtered_submissions, min(10, len(filtered_submissions)))
 
             for submission in sampled_submissions:
                 #Loads "5 batches" of additional comments
