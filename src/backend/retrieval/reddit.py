@@ -98,7 +98,7 @@ class RedditRetriever(Retriever):
                 for year in range(max(self.release_date, current_year - 4), current_year + 1)
             }
 
-            for future in futures_reddit:
+            for future in futures.as_completed(futures_reddit):
                 year = futures_reddit[future]
                 try:
                     reddit = future.result()
