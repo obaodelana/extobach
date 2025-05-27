@@ -78,9 +78,8 @@ Transform raw data into interactive dashboards with actionable intelligence and 
 ## 🚀 Quick Start
 
 ### Prerequisites
-- Node.js 16+ 
-- npm or yarn
-- API credentials for YouTube and Reddit
+- Python 3.10+
+- API credentials for YouTube, Reddit and Perplexity
 
 ### Installation
 
@@ -92,18 +91,22 @@ git clone https://github.com/obaodelana/extobach.git
 cd extobach
 
 # Install dependencies
-npm install
+pip install -r requirements.txt
 
 # Start the application
-npm start
+flask --app src/backend run
 ```
 
 ### 🔧 Configuration
-Ensure your environment variables are configured:
+Create a `.env` file with the following content
 ```bash
-YOUTUBE_API_KEY=your_youtube_api_key
-REDDIT_CLIENT_ID=your_reddit_client_id
-REDDIT_CLIENT_SECRET=your_reddit_client_secret
+PERPLEXITY_API_KEY=...
+YOUTUBE_API_KEY=...
+
+# Only for reddit
+REDDIT_CLIENT_ID=...
+REDDIT_CLIENT_SECRET=...
+REDDIT_USER_AGENT=...
 ```
 
 ---
