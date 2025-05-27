@@ -141,7 +141,7 @@ REDDIT_CLIENT_SECRET=your_reddit_client_secret
 | Name | Role | GitHub |
 |------|------|--------|
 | 🚀 **Oba Odelana** | Backend Developer, Sonar Expert | [@obaodelana](https://github.com/obaodelana) |
-| 💡 **Chim Wopara** | Frontend Developer,Economist |[@Chimwopara](https://github.com/chimwopara) | 
+| 💡 **Chim Wopara** | Frontend Developer, Economist |[@Chimwopara](https://github.com/chimwopara) | 
 | ⚡ **Excel Ojeifo** | Backend Developer, Social API Expert |[@developerxg](https://github.com/developerxg) |
 | 🎨 **Tomiwa Orimoloye** | Frontend Developer, UI UX expert |[@tomiwaorimoloye](https://github.com/tomiwaorimoloye) |
 
