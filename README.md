@@ -1,6 +1,6 @@
 # 📊 Goodsline
 
-**Transform digital chaos into crystal-clear products insights** 🚀
+**Transform digital chaos into crystal-clear product insights** 🚀
 
 [![MIT License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 [![Hackathon Winner](https://img.shields.io/badge/Perplexixity-Hackathon-blue.svg)](#)
