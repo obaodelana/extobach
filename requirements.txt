@@ -15,6 +15,8 @@ idna==3.10
 itsdangerous==2.2.0
 Jinja2==3.1.6
 MarkupSafe==3.0.2
+praw==7.8.1
+prawcore==2.4.0
 proto-plus==1.26.1
 protobuf==6.31.0
 pyasn1==0.6.1
@@ -27,6 +29,8 @@ requests==2.32.3
 rsa==4.9.1
 typing-inspection==0.4.0
 typing_extensions==4.13.2
+update-checker==0.18.0
 uritemplate==4.1.1
 urllib3==2.4.0
+websocket-client==1.8.0
 Werkzeug==3.1.3
