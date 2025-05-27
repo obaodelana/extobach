@@ -10,7 +10,7 @@ class ProductSuggestions:
 
         self.query = query
 
-    @prompt(max_tokens=100, temperature=0.5, json_schema=ProductNames.model_json_schema())
+    @prompt(max_tokens=200, temperature=0.5, json_schema=ProductNames.model_json_schema())
     def _get_suggestions(self) -> str:
         """
         # Identity
@@ -38,7 +38,7 @@ class ProductSuggestions:
         - Respond in JSON format.
         """
 
-        return f"Give me the top 3-10 product names most related to '{self.query}'"
+        return f"Give me the top 3-5 product names most related to '{self.query}'"
 
     @property
     def names(self) -> list[str]:
