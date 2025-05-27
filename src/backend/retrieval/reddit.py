@@ -1,6 +1,6 @@
 import os
 from praw import Reddit
-from praw.reddit import Comment
+from praw.reddit import Comment, Submission
 import datetime
 import calendar
 import random
@@ -20,14 +20,14 @@ class RedditRetriever(Retriever):
         assert self._client_id and self._client_secret and self._user_agent, \
             "Missing Reddit API credentials"
 
-    def _get_thread(self, year: int) -> list[dict]:
-        assert type(year) is int
-
-        reddit = Reddit(
+        self._reddit = Reddit(
             client_id=self._client_id,
             client_secret=self._client_secret,
             user_agent=self._user_agent
         )
+
+    def _get_thread(self, year: int, submissions: list[Submission]) -> list[dict]:
+        assert type(year) is int
 
         # Retrieve start of the year and end of the year as unix epochs (Number of seconds since 1970)
         # calendar.timegm() assumes time tuple is in UTC without applying any timezone effect. (Creates consistency accross different timezones)
@@ -35,20 +35,6 @@ class RedditRetriever(Retriever):
             datetime.datetime(year, 1, 1).timetuple()))
         end_epoch = int(calendar.timegm(datetime.datetime(
             year, 12, 31, 23, 59, 59).timetuple()))
-
-        # Search posts from all subreddits that includes product name
-
-        query = f'title:{self.product_name} OR selftext:{self.product_name}'
-
-        submissions = list(reddit.subreddit('all').search(
-            query=query,
-            # Sort by relevance not by 'new' (New pulls most recent posts which come from 2025)
-            sort='relevance',
-            syntax='lucene',
-            time_filter='all',
-            # Larger pool of posts to sample from to potentially include older posts
-            limit=500
-        ))
 
         # Filter submissions that were published within the year (PRAW doesn't support date range filtering directly :C)
         filtered_submissions = [s for s in submissions
@@ -90,10 +76,23 @@ class RedditRetriever(Retriever):
         all_posts = {}
 
         current_year = datetime.datetime.now().year
+
+        # Search posts from all subreddits that includes product name
+        query = f'title:{self.product_name} OR selftext:{self.product_name}'
+        submissions = list(self._reddit.subreddit('all').search(
+            query=query,
+            # Sort by relevance not by 'new' (New pulls most recent posts which come from 2025)
+            sort='relevance',
+            syntax='lucene',
+            time_filter='all',
+            # Larger pool of posts to sample from to potentially include older posts
+            limit=500
+        ))
+
         # Run concurrently
         with futures.ThreadPoolExecutor(max_workers=6) as exec:
             futures_reddit = {
-                exec.submit(self._get_thread, year): year
+                exec.submit(self._get_thread, year, submissions): year
                 # From 5 years ago till now (or from release date)
                 for year in range(max(self.release_date, current_year - 4), current_year + 1)
             }
