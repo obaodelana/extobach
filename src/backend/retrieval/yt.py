@@ -4,19 +4,17 @@ from datetime import datetime
 import random
 from concurrent import futures
 
+from .retriever import Retriever
 
-class YTRetriever:
+
+class YTRetriever(Retriever):
     def __init__(self,
                  product_name: str,
                  release_date: int) -> None:
-        assert type(product_name) is str
-        assert type(release_date) is int
+        super().__init__(product_name, release_date)
 
         self._api_key = os.getenv('YOUTUBE_API_KEY', None)
         assert self._api_key is not None, "API key not found. Please set the YOUTUBE_API_KEY environment variable."
-
-        self.product_name = product_name
-        self.release_date = release_date
 
     def retrieve(self) -> dict:
         all_videos = {}
