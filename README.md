@@ -183,6 +183,4 @@ Interested in diving deeper? Check out:
 
 *Where every data point tells a story and every comment unlocks market intelligence*
 
-[![Star this repo](https://img.shields.io/github/stars/obaodelana/extobach?style=social)](https://github.com/obaodelana/extobach)
-
 </div>
