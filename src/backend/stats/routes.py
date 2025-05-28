@@ -2,15 +2,25 @@ from flask import Blueprint, request
 from random import sample
 
 from .relevancy import Relevancy
+from .yt import YTRetriever
 
 stats_bp = Blueprint("stats", __name__, url_prefix="/stats")
 
 
 @stats_bp.post("")
 def get_all_stats():
-    yt_data = request.get_json()["videos"]
+    data = request.get_json()
+
+    product_name = data.get('productName')
+    release_date = data.get('releaseDate')
+
+    if not product_name:
+        return {'error': '"productName" is required'}, 400
+    elif not release_date:
+        return {'error': '"releaseDate" is required'}, 400
 
     try:
+        yt_data = YTRetriever(product_name, release_date).retrieve()
         return {
             "comments": get_some_comments(yt_data),
             "relevancy": get_relevancy(yt_data),
