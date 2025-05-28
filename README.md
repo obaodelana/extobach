@@ -93,8 +93,13 @@ cd extobach
 # Install dependencies
 pip install -r requirements.txt
 
-# Start the application
+# Start the backend (optional)
 flask --app src/backend run
+
+# Frontend
+cd src/frontend
+npm install
+npm run dev
 ```
 
 ### 🔧 Configuration
@@ -103,7 +108,7 @@ Create a `.env` file with the following content
 PERPLEXITY_API_KEY=...
 YOUTUBE_API_KEY=...
 
-# Only for reddit
+# Only for reddit (not used)
 REDDIT_CLIENT_ID=...
 REDDIT_CLIENT_SECRET=...
 REDDIT_USER_AGENT=...
@@ -165,15 +170,6 @@ We'd love to connect! 💌
 - 📧 **Email**: [obaloluwa.odelana@gmail.com](mailto:obaloluwa.odelana@gmail.com)
 - 💬 **Issues**: [GitHub Issues](https://github.com/obaodelana/extobach/issues)
 - 🐦 **Updates**: Follow us for the latest developments
-
----
-
-## 🎉 What's Next?
-
-Interested in diving deeper? Check out:
-- 📊 **[Visualization Strategies](docs/visualizations.md)** - Learn about our charting approaches
-- 📈 **[Success Stories](docs/case-studies.md)** - Real-world sentiment analysis examples
-- 🔧 **[API Documentation](docs/api.md)** - Integration guidelines
 
 ---
 
