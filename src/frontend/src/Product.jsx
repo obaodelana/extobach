@@ -9,7 +9,7 @@ function Product({productDetails}) {
     return null;
   }
 
-  const images = productDetails.images || productDetails.image || [];
+  const images = productDetails.images || [];
   const totalImages = images.length;
 
   const handleImageClick = () => {
@@ -20,7 +20,7 @@ function Product({productDetails}) {
 
   const formatPrice = (price) => {
     if (typeof price === 'object' && price.low && price.high) {
-      return `${productDetails.currency || 'USD'} ${price.low} - ${price.high}`;
+      return (price.low == price.high) ? `${productDetails.currency || 'USD'} ${price.low}` : `${productDetails.currency || 'USD'} ${price.low} - ${price.high}`;
     }
     return `${productDetails.currency || 'USD'} ${price}`;
   };

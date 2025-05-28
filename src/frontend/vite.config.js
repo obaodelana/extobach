@@ -9,7 +9,11 @@ export default defineConfig({
       '/sonar': {
         target: 'https://goodsline.onrender.com',
         changeOrigin: true,
-      }
+      },
+      '/stats': {
+        target: 'https://goodsline.onrender.com',
+        changeOrigin: true,
+      },
     }
   }
 })
