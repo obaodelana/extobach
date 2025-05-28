@@ -1,66 +1,49 @@
 from retrieval.yt import YTRetriever
-from retrieval.retriever import Retriever
 
 
-class Relevancy(Retriever):
+class Relevancy:
     def __init__(self,
-                product_name: str,
-                release_date: int) -> None:
-        super().__init__(product_name, release_date)
+                 product_name: str,
+                 release_date: int) -> None:
+        self.product_name = product_name
+        self.release_date = release_date
+        # Cache to avoid repeated API calls
+        self._yt_data: dict | None = None
 
-        #Cache to avoid repeated API calls
-        self._yt_data = None
-    
-    def load_data(self):
+    def _load_data(self) -> dict:
         if self._yt_data is None:
             retriever = YTRetriever(self.product_name, self.release_date)
             self._yt_data = retriever.retrieve()
-            
-        return self._yt_data()
-    
-    def all_views(self) -> int:        
-        video_data = self.load_data()
 
-        total_views = 0
+        return self._yt_data
 
+    def _get_stats(self, stat_name: str) -> dict[int, int]:
+        video_data = self._load_data()
+
+        stats = {}
         # Extract all view count for all videos in each year
-        for _ , videos in video_data.items():
+        for year, videos in video_data.items():
+            total = 0
             for video in videos:
-                view_count = video['statistics'].get('views', 'N/A')
+                count = video['statistics'].get(stat_name, 'N/A')
+                if count != 'N/A':
+                    total += int(count)
+            stats[int(year)] = total
 
-                if view_count != 'N/A':
-                    total_views += int(view_count)
+        return stats
 
-        return total_views
-    
+    def get_score(self) -> dict[int, float]:
+        views = self._get_stats("views")
+        likes = self._get_stats("likes")
+        comments = self._get_stats("comments")
 
-    def all_likes(self) -> int:        
-        video_data = self.load_data()
+        score = {}
 
-        total_likes = 0
+        video_data = self._load_data()
+        for year, _ in video_data.items():
+            year = int(year)
 
-        # Extract all view count for all videos in each year
-        for _ , videos in video_data.items():
-            #Retrieve view count for each video
-            for video in videos:
-                like_count = video['statistics'].get('likes', 'N/A')
+            score[year] = views[year] / likes[year]
+            score[year] += comments[year] * 3
 
-                if like_count != 'N/A':
-                    total_likes += int(like_count)
-
-        return total_likes
-
-
-
-    #Return relevancy score across all videos in the last 5 years
-    def get_score(self) -> int:
-       views = self.all_views()
-       likes = self.all_likes()
-
-       if likes == 0:
-           return float('inf')
-
-       return f"Relevancy score for {self.product_name} is: {views / likes}" 
-
-    
-
+        return score
