@@ -11,8 +11,6 @@ function App() {
     <>
       <Header />
       <Search />
-      <Suggestions />
-      // <Product />
       <Footer />
     </>
   )

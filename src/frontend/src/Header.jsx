@@ -3,7 +3,7 @@ function Header() {
     <header>
       <nav>
         <ul>
-          <li class="logo"><a href="#">GoodsLine 🛒</a></li>
+          <li className="logo"><a href="#">GoodsLine 🛒</a></li>
         </ul>
         <ul>
           <li><a href="#">🔎</a></li>
