@@ -4,7 +4,6 @@ import Product from './Product';
 import Loader from './Loader';
 
 
-
 function Search() {
   const [suggestions, setSuggestions] = useState([])
   const [product, setProduct] = useState()
