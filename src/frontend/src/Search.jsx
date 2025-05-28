@@ -3,24 +3,26 @@ import Suggestion from './Suggestion';
 import Product from './Product';
 import Loader from './Loader';
 
-
 function Search() {
   const [suggestions, setSuggestions] = useState([])
   const [product, setProduct] = useState()
   const [details, setDetails] = useState();
   const [loaderVisibility, setLoaderVisibility] = useState(false);
+  const [isSearching, setIsSearching] = useState(false);
 
   async function getProductDetails(event) {
     event.preventDefault();
     setLoaderVisibility(true);
+    setIsSearching(true);
     setDetails(null);
     const searchQuery = document.getElementById('searchbox').value;
-    // document.getElementById('searchbox').value = '';
     
-    // get search query from input field
     const product_url = "/sonar/product"
-    // const suggestion_url = "/sonar/suggestions"
-    if (!searchQuery) return;
+    if (!searchQuery) {
+      setLoaderVisibility(false);
+      setIsSearching(false);
+      return;
+    }
 
     try {
       const response = await fetch(product_url, {
@@ -35,57 +37,47 @@ function Search() {
       console.error('Error fetching product details:', error);
     } finally {
       setLoaderVisibility(false);
+      setIsSearching(false);
     }
-
-    // ask server to give suggestions
-
-    // store sugesstions in a list
-
-    // pass list as props to suggestion
   }
   
   return (
     <main>
       <div className="jumbotron">
-        <h1>Goodsline</h1>
-        <form action="#" method="get" id="search-form" onSubmit={async e => {
-          const data = await getProductDetails(e);
-          const loader = document.querySelector(".loader");
-          loader.setAttribute("display", "block")
-          setDetails(data)
-        } }>
-          <input type="text" name="search-input" id="searchbox" placeholder="Search a product..." />
-          <input type="submit" className="hidden-submit" hid-focus="true" />
+        <h1>GoodsLine</h1>
+        <form 
+          action="#" 
+          method="get" 
+          id="search-form" 
+          onSubmit={async e => {
+            const data = await getProductDetails(e);
+            setDetails(data)
+          }}
+        >
+          <input 
+            type="text" 
+            name="search-input" 
+            id="searchbox" 
+            placeholder="Search for products..." 
+            autoComplete="off"
+          />
+          <input type="submit" className="hidden-submit" />
         </form>
         <Suggestion suggestions={suggestions} />
       </div>
-      {loaderVisibility && <Loader />}
-      {details && <Product productDetails={details}/>}
+      
+      {loaderVisibility && (
+        <div className="loading-container">
+          <Loader />
+          <div className="loading-text">Searching for products...</div>
+        </div>
+      )}
+      
+      <div className="product-results">
+        {details && <Product productDetails={details}/>}
+      </div>
     </main>
   )
 }
-/*
-{
-    availability: "In stock",
-    brand: "Sony",
-    category: "Technology",
-    currency: "USD",
-    description: "A high-quality product that meets all your needs.",
-    image: [
-      "https://example.com/image1.jpg",
-      "https://example.com/image2.jpg",
-      "https://example.com/image3.jpg",
-      "https://example.com/image4.jpg",
-      "https://example.com/image5.jpg"
-    ],
-    name: "Sample Product",
-    price: {
-      high: 100,
-      low: 50
-    },
-    rating: 4.5,
-    releaseDate: 2024
-  }
-*/
 
 export default Search

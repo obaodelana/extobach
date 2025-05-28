@@ -1,10 +1,21 @@
-function Footer() {
+function Suggestion({ suggestions }) {
+  if (!suggestions || suggestions.length === 0) {
+    return null;
+  }
 
-  return(
-    <footer>
-      <span>Copyright &copy; All Right Reserved. Made with ❤️ by Extobach</span>
-    </footer>
+  const suggestionItems = suggestions.map((suggestion, index) => (
+    <li key={index} className="suggestion-item">
+      <span>{suggestion}</span>
+    </li>
+  ));
+
+  return (
+    <div className="suggestion-container">
+      <ul className="suggestion-list">
+        {suggestionItems}
+      </ul>
+    </div>
   )
 }
 
-export default Footer
+export default Suggestion
