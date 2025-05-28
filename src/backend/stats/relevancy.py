@@ -1,24 +1,10 @@
-from retrieval.yt import YTRetriever
-
-
 class Relevancy:
     def __init__(self,
-                 product_name: str,
-                 release_date: int) -> None:
-        self.product_name = product_name
-        self.release_date = release_date
-        # Cache to avoid repeated API calls
-        self._yt_data: dict | None = None
-
-    def _load_data(self) -> dict:
-        if self._yt_data is None:
-            retriever = YTRetriever(self.product_name, self.release_date)
-            self._yt_data = retriever.retrieve()
-
-        return self._yt_data
+                 yt_data: dict) -> None:
+        self._yt_data: dict = yt_data
 
     def _get_stats(self, stat_name: str) -> dict[int, int]:
-        video_data = self._load_data()
+        video_data = self._yt_data
 
         stats = {}
         # Extract all view count for all videos in each year
@@ -39,7 +25,7 @@ class Relevancy:
 
         score = {}
 
-        video_data = self._load_data()
+        video_data = self._yt_data
         for year, _ in video_data.items():
             year = int(year)
 
