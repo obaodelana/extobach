@@ -2,6 +2,7 @@ from flask import Blueprint, request
 from random import sample
 
 from .relevancy import Relevancy
+from .sentiment import Sentiment
 from .yt import YTRetriever
 
 stats_bp = Blueprint("stats", __name__, url_prefix="/stats")
@@ -50,5 +51,6 @@ def get_relevancy(yt_data: dict) -> dict:
 
 
 def get_sentiment(yt_data: dict) -> dict:
-    # TODO
-    return {}
+    sentiment = Sentiment(yt_data)
+
+    return sentiment.get_score()
