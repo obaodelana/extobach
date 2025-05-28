@@ -1,0 +1,29 @@
+main {
+  flex-direction: column;
+}
+
+h2 {
+  font-size: 3rem;
+}
+
+.product {
+  display: flex;
+  justify-content: space-between;
+  width: 80%;
+}
+
+.product-image img {
+  max-width: 300px;
+}
+
+.product-description {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  max-width: 60%;
+}
+
+.product-description p {
+  font-size: 1.25rem;
+  max-width: 70%;
+}
