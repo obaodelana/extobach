@@ -90,10 +90,14 @@ git clone https://github.com/obaodelana/extobach.git
 # Navigate to project directory
 cd extobach
 
+# Create a virtual environment
+python -m venv .venv
+source .venv/bin/activate
+
 # Install dependencies
 pip install -r requirements.txt
 
-# Start the backend (optional)
+# Start the backend 
 flask --app src/backend run
 
 # Frontend
