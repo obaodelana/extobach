@@ -1,5 +1,10 @@
 # 📈 Goodsline 📉
 
+<p align="center">
+    <img width="500" src="https://github.com/user-attachments/assets/112cfbde-5cbd-4e12-80f0-0a6732b7bb5c" alt="Screenshot of app on iMac 2015"/>
+    <img width="500" src="https://github.com/user-attachments/assets/1c92b06b-07fa-44f7-bc8f-ea4c355256d0" alt="Screenshot of app on iMac 2015"/>
+</p>
+
 **Transform digital chaos into crystal-clear product insights** 🚀
 
 [![MIT License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
