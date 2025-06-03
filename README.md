@@ -112,7 +112,7 @@ npm run dev
 ```
 
 ### 🔧 Configuration
-Create a `.env` file with the following content
+Create a `.env` file (in the root directory) with the following content
 ```bash
 PERPLEXITY_API_KEY=...
 YOUTUBE_API_KEY=...
